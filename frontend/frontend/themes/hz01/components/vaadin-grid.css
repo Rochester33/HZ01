@@ -1,0 +1,19 @@
+/* Table header */
+[part~="header-cell"] {
+    background: linear-gradient(180deg, #f8fafc 0%, #f1f5f9 100%);
+    border-bottom: 2px solid #e2e8f0 !important;
+    font-weight: 700;
+    font-size: 0.80em;
+    letter-spacing: 0.07em;
+    text-transform: uppercase;
+    color: #475569;
+}
+
+/* Row highlights */
+:host .row-warning [part~="cell"] {
+    background: rgba(254, 249, 195, 0.55);
+}
+
+:host .row-critical [part~="cell"] {
+    background: rgba(254, 226, 226, 0.75);
+}

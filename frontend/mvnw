@@ -1,0 +1,19 @@
+#!/bin/sh
+# Maven Wrapper start up script for UN*X systems
+# Licensed to the Apache Software Foundation (ASF) under one or more
+# contributor license agreements.
+
+set -e
+
+MAVEN_WRAPPER_JAR=".mvn/wrapper/maven-wrapper.jar"
+MAVEN_WRAPPER_PROPERTIES=".mvn/wrapper/maven-wrapper.properties"
+
+if [ -r "$MAVEN_WRAPPER_JAR" ]; then
+    DOWNLOAD_URL=$(grep "^wrapperUrl" "$MAVEN_WRAPPER_PROPERTIES" | tail -1 | sed 's/.*=//')
+fi
+
+exec java $MAVEN_OPTS \
+    -classpath ".mvn/wrapper/maven-wrapper.jar" \
+    "-Dmaven.multiModuleProjectDirectory=$PWD" \
+    "-Dmaven.home=$HOME/.m2/wrapper/dists" \
+    org.apache.maven.wrapper.MavenWrapperMain "$@"

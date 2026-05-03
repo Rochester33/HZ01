@@ -1,0 +1,242 @@
+html {
+    /* ── Larger type scale ─────────────────────────── */
+    --lumo-font-size-xs:   0.84rem;
+    --lumo-font-size-s:    0.96rem;
+    --lumo-font-size-m:    1.08rem;
+    --lumo-font-size-l:    1.28rem;
+    --lumo-font-size-xl:   1.56rem;
+    --lumo-font-size-xxl:  1.9rem;
+    --lumo-font-size-xxxl: 2.5rem;
+    --lumo-size-m:   2.65rem;
+    --lumo-size-l:   3.2rem;
+    --lumo-size-xl:  4rem;
+
+    /* ── Colour palette ─────────────────────────────── */
+    --lumo-primary-color:       #2563eb;
+    --lumo-primary-color-50pct: rgba(37, 99, 235, 0.5);
+    --lumo-primary-color-10pct: rgba(37, 99, 235, 0.1);
+    --lumo-primary-text-color:  #1d4ed8;
+    --lumo-base-color:          #f8fafc;
+    --lumo-border-radius-m:     9px;
+    --lumo-border-radius-l:     14px;
+    --lumo-space-m:             1.3rem;
+
+    /* ── Shadow scale ───────────────────────────────── */
+    --lumo-box-shadow-s:  0 2px 8px  rgba(0,0,0,0.10), 0 1px 2px rgba(0,0,0,0.06);
+    --lumo-box-shadow-m:  0 4px 16px rgba(0,0,0,0.12), 0 2px 4px rgba(0,0,0,0.07);
+    --lumo-box-shadow-l:  0 8px 32px rgba(0,0,0,0.14), 0 4px 8px rgba(0,0,0,0.08);
+    --lumo-box-shadow-xl: 0 16px 48px rgba(0,0,0,0.18), 0 6px 12px rgba(0,0,0,0.10);
+}
+
+/* ── Sidebar ─────────────────────────────────────────── */
+vaadin-app-layout::part(drawer) {
+    background: linear-gradient(170deg, #1e3a5f 0%, #0f2540 100%);
+    box-shadow: 4px 0 24px rgba(0, 0, 0, 0.30);
+    border-right: none;
+    min-width: 232px;
+}
+
+/* Force ALL drawer text to white */
+vaadin-app-layout [slot="drawer"],
+vaadin-app-layout [slot="drawer"] * {
+    color: white;
+}
+
+vaadin-side-nav {
+    --lumo-secondary-text-color: rgba(255,255,255,0.60);
+    --lumo-tertiary-text-color:  rgba(255,255,255,0.40);
+    --lumo-contrast-60pct:       rgba(255,255,255,0.60);
+}
+
+vaadin-side-nav-item::part(item) {
+    color: rgba(255,255,255,0.82);
+    border-radius: 9px;
+    margin: 3px 8px;
+    padding: 0 16px;
+    height: 2.7rem;
+    font-size: 1rem;
+    font-weight: 400;
+    transition: background 0.18s, color 0.18s, box-shadow 0.18s;
+    border: 1px solid transparent;
+}
+
+vaadin-side-nav-item:hover::part(item) {
+    background-color: rgba(255,255,255,0.10);
+    color: #ffffff;
+    border-color: rgba(255,255,255,0.14);
+    box-shadow: 0 2px 10px rgba(0,0,0,0.22);
+}
+
+vaadin-side-nav-item[active]::part(item) {
+    background: linear-gradient(90deg, rgba(255,255,255,0.24) 0%, rgba(255,255,255,0.12) 100%);
+    color: #ffffff;
+    font-weight: 600;
+    border-color: rgba(255,255,255,0.26);
+    box-shadow: 0 2px 14px rgba(0,0,0,0.28), inset 4px 0 0 rgba(255,255,255,0.80);
+}
+
+vaadin-side-nav-item::part(prefix),
+vaadin-side-nav-item::part(suffix) {
+    color: rgba(255,255,255,0.70);
+}
+
+vaadin-side-nav-item[active]::part(prefix),
+vaadin-side-nav-item[active]::part(suffix) {
+    color: #ffffff;
+}
+
+/* ── Navbar ─────────────────────────────────────────── */
+vaadin-app-layout::part(navbar) {
+    background: #ffffff;
+    box-shadow: 0 2px 14px rgba(0,0,0,0.10), 0 1px 3px rgba(0,0,0,0.05);
+    border-bottom: 1px solid #e2e8f0;
+    min-height: 62px;
+}
+
+/* ── Brand block ─────────────────────────────────────── */
+.nav-brand {
+    display: flex;
+    flex-direction: column;
+    gap: 1px;
+    line-height: 1.2;
+}
+
+.brand-title-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.brand-title {
+    font-size: 1.5rem;
+    font-weight: 900;
+    color: #0f172a;
+    letter-spacing: 0.06em;
+    text-shadow: 0 2px 10px rgba(0,0,0,0.22), 0 1px 3px rgba(0,0,0,0.14);
+}
+
+.brand-version {
+    display: inline-block;
+    font-size: 0.60rem;
+    background: #1e3a5f;
+    color: white;
+    padding: 2px 9px;
+    border-radius: 20px;
+    font-weight: 700;
+    letter-spacing: 0.07em;
+    box-shadow: 0 2px 7px rgba(30,58,95,0.40);
+    vertical-align: middle;
+}
+
+.brand-sub {
+    font-size: 0.68rem;
+    color: #64748b;
+    font-weight: 600;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    text-shadow: 0 1px 4px rgba(0,0,0,0.10);
+}
+
+/* ── Content area — subtle dot grid ─────────────────── */
+vaadin-app-layout::part(content) {
+    background-color: #eef2f7;
+    background-image:
+        radial-gradient(circle at 1px 1px, rgba(148,163,184,0.28) 1.5px, transparent 0);
+    background-size: 26px 26px;
+}
+
+/* ── Grid ────────────────────────────────────────────── */
+vaadin-grid {
+    border-radius: 13px;
+    box-shadow: 0 4px 22px rgba(0,0,0,0.10), 0 1px 5px rgba(0,0,0,0.05);
+    background: #ffffff;
+    overflow: hidden;
+    border: 1px solid rgba(0,0,0,0.045);
+}
+
+/* ── Buttons ─────────────────────────────────────────── */
+vaadin-button::part(button) {
+    box-shadow: 0 2px 7px rgba(0,0,0,0.13), 0 1px 2px rgba(0,0,0,0.07);
+    transition: box-shadow 0.15s, transform 0.1s;
+}
+
+vaadin-button:hover::part(button) {
+    box-shadow: 0 5px 14px rgba(0,0,0,0.17), 0 2px 4px rgba(0,0,0,0.08);
+    transform: translateY(-1px);
+}
+
+vaadin-button:active::part(button) {
+    box-shadow: 0 1px 3px rgba(0,0,0,0.10);
+    transform: translateY(0);
+}
+
+/* ── Form fields ─────────────────────────────────────── */
+vaadin-text-field::part(input-field),
+vaadin-number-field::part(input-field),
+vaadin-integer-field::part(input-field),
+vaadin-select::part(input-field) {
+    box-shadow: 0 1px 4px rgba(0,0,0,0.07);
+    transition: box-shadow 0.15s;
+}
+
+vaadin-text-field[focused]::part(input-field),
+vaadin-number-field[focused]::part(input-field),
+vaadin-integer-field[focused]::part(input-field),
+vaadin-select[focused]::part(input-field) {
+    box-shadow: 0 0 0 3px rgba(37,99,235,0.18), 0 1px 4px rgba(0,0,0,0.07);
+}
+
+/* ── Notifications ───────────────────────────────────── */
+vaadin-notification-card {
+    box-shadow: 0 10px 36px rgba(0,0,0,0.20), 0 2px 6px rgba(0,0,0,0.10);
+    border-radius: 12px;
+}
+
+/* ── Status badges ───────────────────────────────────── */
+.badge-normal {
+    display: inline-block;
+    background: #dcfce7;
+    color: #14532d;
+    padding: 4px 15px;
+    border-radius: 999px;
+    font-weight: 700;
+    font-size: 0.83em;
+    letter-spacing: 0.03em;
+    box-shadow: 0 1px 4px rgba(20,83,45,0.15);
+}
+
+.badge-warning {
+    display: inline-block;
+    background: #fef9c3;
+    color: #713f12;
+    padding: 4px 15px;
+    border-radius: 999px;
+    font-weight: 700;
+    font-size: 0.83em;
+    letter-spacing: 0.03em;
+    box-shadow: 0 1px 4px rgba(113,63,18,0.15);
+}
+
+.badge-critical {
+    display: inline-block;
+    background: #fee2e2;
+    color: #7f1d1d;
+    padding: 4px 15px;
+    border-radius: 999px;
+    font-weight: 700;
+    font-size: 0.83em;
+    letter-spacing: 0.03em;
+    box-shadow: 0 1px 4px rgba(127,29,29,0.18);
+}
+
+.badge-offline {
+    display: inline-block;
+    background: #f1f5f9;
+    color: #475569;
+    padding: 4px 15px;
+    border-radius: 999px;
+    font-weight: 700;
+    font-size: 0.83em;
+    letter-spacing: 0.03em;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.09);
+}

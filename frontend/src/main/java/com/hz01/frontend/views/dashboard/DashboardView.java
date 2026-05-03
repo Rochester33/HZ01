@@ -1,0 +1,125 @@
+package com.hz01.frontend.views.dashboard;
+
+import com.hz01.frontend.client.SensorApiClient;
+import com.hz01.frontend.dto.SensorReadingDto;
+import com.hz01.frontend.service.RealtimeEventBus;
+import com.hz01.frontend.views.MainLayout;
+import com.vaadin.flow.component.AttachEvent;
+import com.vaadin.flow.component.DetachEvent;
+import com.vaadin.flow.component.UI;
+import com.vaadin.flow.component.grid.Grid;
+import com.vaadin.flow.component.grid.GridVariant;
+import com.vaadin.flow.component.html.H2;
+import com.vaadin.flow.component.html.Span;
+import com.vaadin.flow.component.orderedlayout.VerticalLayout;
+import com.vaadin.flow.i18n.LocaleChangeEvent;
+import com.vaadin.flow.i18n.LocaleChangeObserver;
+import com.vaadin.flow.router.PageTitle;
+import com.vaadin.flow.router.Route;
+import reactor.core.Disposable;
+
+import java.util.ArrayList;
+import java.util.List;
+
+@Route(value = "", layout = MainLayout.class)
+@PageTitle("HZ-01 Dashboard")
+public class DashboardView extends VerticalLayout implements LocaleChangeObserver {
+
+    private final SensorApiClient sensorApiClient;
+    private final RealtimeEventBus eventBus;
+
+    private final Grid<SensorReadingDto> grid = new Grid<>(SensorReadingDto.class, false);
+    private final List<SensorReadingDto> readings = new ArrayList<>();
+    private final H2 title = new H2();
+    private Disposable subscription;
+
+    public DashboardView(SensorApiClient sensorApiClient, RealtimeEventBus eventBus) {
+        this.sensorApiClient = sensorApiClient;
+        this.eventBus = eventBus;
+
+        setSizeFull();
+        setPadding(true);
+
+        title.setText(getTranslation("nav.dashboard"));
+        configureGrid();
+        add(title, grid);
+
+        loadData();
+    }
+
+    private void configureGrid() {
+        grid.addThemeVariants(GridVariant.LUMO_ROW_STRIPES, GridVariant.LUMO_COMPACT);
+        grid.setSizeFull();
+
+        grid.addColumn(SensorReadingDto::deviceId).setHeader(getTranslation("sensor.device")).setAutoWidth(true);
+        grid.addColumn(r -> formatVal(r.temperature(), "°C")).setHeader(getTranslation("sensor.temperature")).setAutoWidth(true);
+        grid.addColumn(r -> formatVal(r.humidity(), "%")).setHeader(getTranslation("sensor.humidity")).setAutoWidth(true);
+        grid.addColumn(r -> formatVal(r.oxygen(), "%")).setHeader(getTranslation("sensor.oxygen")).setAutoWidth(true);
+        grid.addColumn(r -> formatVal(r.coLevel(), " ppm")).setHeader(getTranslation("sensor.co")).setAutoWidth(true);
+        grid.addColumn(r -> formatVal(r.batteryLevel(), "%")).setHeader(getTranslation("sensor.battery")).setAutoWidth(true);
+        grid.addComponentColumn(r -> statusBadge(r)).setHeader(getTranslation("sensor.status")).setAutoWidth(true);
+
+        grid.setClassNameGenerator(r -> {
+            String level = computeLevel(r);
+            return "row-" + level;
+        });
+    }
+
+    private String formatVal(Double val, String unit) {
+        return val == null ? "--" : String.format("%.1f%s", val, unit);
+    }
+
+    private Span statusBadge(SensorReadingDto r) {
+        String level = computeLevel(r);
+        Span badge = new Span(getTranslation("status." + level));
+        badge.addClassName("badge-" + level);
+        return badge;
+    }
+
+    private String computeLevel(SensorReadingDto r) {
+        if (r.oxygen() != null && r.oxygen() < 18) return "critical";
+        if (r.coLevel() != null && r.coLevel() > 50) return "critical";
+        if (r.temperature() != null && r.temperature() > 45) return "critical";
+        if (r.oxygen() != null && r.oxygen() < 19.5) return "warning";
+        if (r.coLevel() != null && r.coLevel() > 25) return "warning";
+        if (r.temperature() != null && r.temperature() > 35) return "warning";
+        if (r.batteryLevel() != null && r.batteryLevel() < 10) return "critical";
+        if (r.batteryLevel() != null && r.batteryLevel() < 20) return "warning";
+        return "normal";
+    }
+
+    private void loadData() {
+        readings.clear();
+        readings.addAll(sensorApiClient.getLatestReadings());
+        grid.setItems(readings);
+    }
+
+    @Override
+    protected void onAttach(AttachEvent event) {
+        UI ui = event.getUI();
+        subscription = eventBus.subscribeReadings().subscribe(msg -> {
+            ui.access(() -> {
+                readings.removeIf(r -> r.deviceId().equals(msg.deviceId()));
+                readings.add(new SensorReadingDto(
+                        null, msg.deviceId(),
+                        msg.temperature(), msg.humidity(), msg.oxygen(),
+                        msg.coLevel(), msg.batteryLevel(), null, null));
+                grid.setItems(new ArrayList<>(readings));
+            });
+        });
+    }
+
+    @Override
+    protected void onDetach(DetachEvent event) {
+        if (subscription != null) subscription.dispose();
+    }
+
+    @Override
+    public void localeChange(LocaleChangeEvent event) {
+        title.setText(getTranslation("nav.dashboard"));
+        grid.getColumns().forEach(col -> col.setVisible(false));
+        grid.removeAllColumns();
+        configureGrid();
+        grid.setItems(readings);
+    }
+}

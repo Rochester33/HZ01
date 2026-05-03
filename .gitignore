@@ -1,0 +1,64 @@
+# Claude Code
+.claude/
+
+# Arduino build artifacts
+build/
+*.elf
+*.bin
+*.hex
+*.map
+
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+.venv/
+venv/
+env/
+*.egg-info/
+dist/
+.eggs/
+
+# Java
+*.class
+*.jar
+*.war
+target/
+.gradle/
+build/
+
+# IDE
+.vscode/
+.idea/
+*.iml
+*.suo
+*.user
+
+# OS
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Environment & secrets
+.env
+.env.*
+*.key
+*.pem
+secrets.*
+
+# Logs
+*.log
+logs/
+
+# Database
+*.db
+*.sqlite
+*.sqlite3
+
+# Node (if frontend uses npm)
+node_modules/
+dist/
+.npm/
+
+# Compiled docs
+*.pdf
