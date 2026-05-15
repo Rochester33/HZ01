@@ -1,19 +1,57 @@
-/* Table header */
+/* ── Table header ────────────────────────────────────────── */
 [part~="header-cell"] {
-    background: linear-gradient(180deg, #f8fafc 0%, #f1f5f9 100%);
-    border-bottom: 2px solid #e2e8f0 !important;
+    background: linear-gradient(180deg, #1e293b 0%, #162032 100%);
+    border-bottom: 2px solid rgba(59,130,246,0.28) !important;
     font-weight: 700;
-    font-size: 0.80em;
-    letter-spacing: 0.07em;
+    font-size: 0.77em;
+    letter-spacing: 0.09em;
     text-transform: uppercase;
-    color: #475569;
+    color: #64748b;
 }
 
-/* Row highlights */
+/* ── Body cells ──────────────────────────────────────────── */
+[part~="body-cell"] {
+    background: #1e293b;
+    border-bottom: 1px solid rgba(148,163,184,0.06);
+    color: #cbd5e1;
+    font-size: 0.93em;
+}
+
+/* ── Row stripe (LUMO_ROW_STRIPES) ───────────────────────── */
+:host([theme~="row-stripes"]) [part~="body-cell"][odd] {
+    background: rgba(148,163,184,0.04);
+}
+
+/* ── Hover row ───────────────────────────────────────────── */
+:host [part~="body-cell"]:hover,
+:host tr:hover > [part~="body-cell"] {
+    background: rgba(59,130,246,0.08);
+}
+
+/* ── Row status highlights ───────────────────────────────── */
 :host .row-warning [part~="cell"] {
-    background: rgba(254, 249, 195, 0.55);
+    background: rgba(245,158,11,0.09);
+    border-left: 2px solid rgba(245,158,11,0.55);
 }
 
 :host .row-critical [part~="cell"] {
-    background: rgba(254, 226, 226, 0.75);
+    background: rgba(244,63,94,0.10);
+    border-left: 2px solid rgba(244,63,94,0.60);
+}
+
+:host .row-normal [part~="cell"] {
+    background: rgba(16,185,129,0.05);
+}
+
+/* ── Selected row ────────────────────────────────────────── */
+:host [part~="body-cell"][selected] {
+    background: rgba(59,130,246,0.16) !important;
+}
+
+/* ── First/last border radius ────────────────────────────── */
+:host [part~="first-header-cell"] {
+    border-radius: 14px 0 0 0;
+}
+:host [part~="last-header-cell"] {
+    border-radius: 0 14px 0 0;
 }

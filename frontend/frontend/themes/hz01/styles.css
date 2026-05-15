@@ -1,99 +1,154 @@
-html {
-    /* ── Larger type scale ─────────────────────────── */
-    --lumo-font-size-xs:   0.84rem;
-    --lumo-font-size-s:    0.96rem;
-    --lumo-font-size-m:    1.08rem;
-    --lumo-font-size-l:    1.28rem;
-    --lumo-font-size-xl:   1.56rem;
-    --lumo-font-size-xxl:  1.9rem;
-    --lumo-font-size-xxxl: 2.5rem;
-    --lumo-size-m:   2.65rem;
-    --lumo-size-l:   3.2rem;
-    --lumo-size-xl:  4rem;
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
 
-    /* ── Colour palette ─────────────────────────────── */
-    --lumo-primary-color:       #2563eb;
-    --lumo-primary-color-50pct: rgba(37, 99, 235, 0.5);
-    --lumo-primary-color-10pct: rgba(37, 99, 235, 0.1);
-    --lumo-primary-text-color:  #1d4ed8;
-    --lumo-base-color:          #f8fafc;
-    --lumo-border-radius-m:     9px;
-    --lumo-border-radius-l:     14px;
-    --lumo-space-m:             1.3rem;
-
-    /* ── Shadow scale ───────────────────────────────── */
-    --lumo-box-shadow-s:  0 2px 8px  rgba(0,0,0,0.10), 0 1px 2px rgba(0,0,0,0.06);
-    --lumo-box-shadow-m:  0 4px 16px rgba(0,0,0,0.12), 0 2px 4px rgba(0,0,0,0.07);
-    --lumo-box-shadow-l:  0 8px 32px rgba(0,0,0,0.14), 0 4px 8px rgba(0,0,0,0.08);
-    --lumo-box-shadow-xl: 0 16px 48px rgba(0,0,0,0.18), 0 6px 12px rgba(0,0,0,0.10);
+/* ── Keyframes ─────────────────────────────────────────── */
+@keyframes fadeIn   { from { opacity: 0; } to { opacity: 1; } }
+@keyframes slideUp  { from { opacity: 0; transform: translateY(24px); } to { opacity: 1; transform: translateY(0); } }
+@keyframes scaleIn  { from { opacity: 0; transform: scale(0.92); } to { opacity: 1; transform: scale(1); } }
+@keyframes pulseRing {
+    0%   { transform: scale(1);   opacity: 0.8; }
+    100% { transform: scale(1.6); opacity: 0; }
+}
+@keyframes float {
+    0%, 100% { transform: translateY(0); }
+    50%       { transform: translateY(-6px); }
 }
 
-/* ── Sidebar ─────────────────────────────────────────── */
+/* ── Base tokens ────────────────────────────────────────── */
+html {
+    font-family: 'Inter', sans-serif;
+
+    /* Type scale */
+    --lumo-font-size-xs:   0.82rem;
+    --lumo-font-size-s:    0.93rem;
+    --lumo-font-size-m:    1.05rem;
+    --lumo-font-size-l:    1.25rem;
+    --lumo-font-size-xl:   1.50rem;
+    --lumo-font-size-xxl:  1.85rem;
+    --lumo-font-size-xxxl: 2.40rem;
+    --lumo-size-m:   2.6rem;
+    --lumo-size-l:   3.1rem;
+    --lumo-size-xl:  3.9rem;
+
+    /* Dark palette */
+    --lumo-base-color:           #0f172a;
+    --lumo-body-text-color:      #e2e8f0;
+    --lumo-secondary-text-color: #94a3b8;
+    --lumo-tertiary-text-color:  #64748b;
+    --lumo-disabled-text-color:  #475569;
+    --lumo-contrast-5pct:        rgba(148,163,184,0.06);
+    --lumo-contrast-10pct:       rgba(148,163,184,0.10);
+    --lumo-contrast-20pct:       rgba(148,163,184,0.18);
+    --lumo-contrast-30pct:       rgba(148,163,184,0.28);
+    --lumo-contrast-40pct:       rgba(148,163,184,0.38);
+    --lumo-contrast-50pct:       rgba(148,163,184,0.50);
+    --lumo-contrast-60pct:       rgba(148,163,184,0.60);
+    --lumo-contrast-80pct:       rgba(148,163,184,0.80);
+    --lumo-contrast-90pct:       rgba(148,163,184,0.90);
+
+    /* Accent – blue-500 */
+    --lumo-primary-color:        #3b82f6;
+    --lumo-primary-color-50pct:  rgba(59,130,246,0.50);
+    --lumo-primary-color-10pct:  rgba(59,130,246,0.12);
+    --lumo-primary-text-color:   #60a5fa;
+    --lumo-primary-contrast-color: #ffffff;
+
+    /* Error / warning / success */
+    --lumo-error-color:          #f43f5e;
+    --lumo-error-color-50pct:    rgba(244,63,94,0.50);
+    --lumo-error-color-10pct:    rgba(244,63,94,0.12);
+    --lumo-warning-color:        #f59e0b;
+    --lumo-warning-color-10pct:  rgba(245,158,11,0.14);
+    --lumo-success-color:        #10b981;
+    --lumo-success-color-50pct:  rgba(16,185,129,0.50);
+    --lumo-success-color-10pct:  rgba(16,185,129,0.12);
+
+    /* Borders */
+    --lumo-border-radius-s:  6px;
+    --lumo-border-radius-m:  10px;
+    --lumo-border-radius-l:  16px;
+    --lumo-space-m:          1.2rem;
+
+    /* Shadows — deeper on dark */
+    --lumo-box-shadow-s:  0 2px 10px  rgba(0,0,0,0.40), 0 1px 3px rgba(0,0,0,0.25);
+    --lumo-box-shadow-m:  0 4px 20px  rgba(0,0,0,0.50), 0 2px 5px rgba(0,0,0,0.30);
+    --lumo-box-shadow-l:  0 8px 36px  rgba(0,0,0,0.55), 0 4px 10px rgba(0,0,0,0.35);
+    --lumo-box-shadow-xl: 0 16px 56px rgba(0,0,0,0.65), 0 6px 14px rgba(0,0,0,0.40);
+}
+
+/* ── App-level background ───────────────────────────────── */
+vaadin-app-layout::part(content) {
+    background-color: #0f172a;
+    background-image:
+        radial-gradient(circle at 1px 1px, rgba(148,163,184,0.07) 1.5px, transparent 0);
+    background-size: 28px 28px;
+    animation: fadeIn 0.5s ease-out;
+}
+
+/* ── Sidebar ─────────────────────────────────────────────── */
 vaadin-app-layout::part(drawer) {
-    background: linear-gradient(170deg, #1e3a5f 0%, #0f2540 100%);
-    box-shadow: 4px 0 24px rgba(0, 0, 0, 0.30);
-    border-right: none;
+    background: linear-gradient(170deg, #1e293b 0%, #0f172a 100%);
+    box-shadow: 4px 0 28px rgba(0,0,0,0.55);
+    border-right: 1px solid rgba(59,130,246,0.14);
     min-width: 232px;
 }
 
-/* Force ALL drawer text to white */
 vaadin-app-layout [slot="drawer"],
 vaadin-app-layout [slot="drawer"] * {
-    color: white;
+    color: #e2e8f0;
 }
 
 vaadin-side-nav {
-    --lumo-secondary-text-color: rgba(255,255,255,0.60);
-    --lumo-tertiary-text-color:  rgba(255,255,255,0.40);
-    --lumo-contrast-60pct:       rgba(255,255,255,0.60);
+    --lumo-secondary-text-color: rgba(148,163,184,0.70);
+    --lumo-tertiary-text-color:  rgba(148,163,184,0.45);
+    --lumo-contrast-60pct:       rgba(148,163,184,0.60);
 }
 
 vaadin-side-nav-item::part(item) {
-    color: rgba(255,255,255,0.82);
-    border-radius: 9px;
+    color: rgba(226,232,240,0.78);
+    border-radius: 10px;
     margin: 3px 8px;
     padding: 0 16px;
     height: 2.7rem;
-    font-size: 1rem;
+    font-size: 0.97rem;
     font-weight: 400;
-    transition: background 0.18s, color 0.18s, box-shadow 0.18s;
+    transition: background 0.2s, color 0.2s, box-shadow 0.2s, border-color 0.2s;
     border: 1px solid transparent;
 }
 
 vaadin-side-nav-item:hover::part(item) {
-    background-color: rgba(255,255,255,0.10);
-    color: #ffffff;
-    border-color: rgba(255,255,255,0.14);
-    box-shadow: 0 2px 10px rgba(0,0,0,0.22);
+    background: rgba(59,130,246,0.12);
+    color: #93c5fd;
+    border-color: rgba(59,130,246,0.25);
+    box-shadow: 0 2px 12px rgba(59,130,246,0.18);
 }
 
 vaadin-side-nav-item[active]::part(item) {
-    background: linear-gradient(90deg, rgba(255,255,255,0.24) 0%, rgba(255,255,255,0.12) 100%);
-    color: #ffffff;
+    background: linear-gradient(90deg, rgba(59,130,246,0.28) 0%, rgba(139,92,246,0.18) 100%);
+    color: #bfdbfe;
     font-weight: 600;
-    border-color: rgba(255,255,255,0.26);
-    box-shadow: 0 2px 14px rgba(0,0,0,0.28), inset 4px 0 0 rgba(255,255,255,0.80);
+    border-color: rgba(99,153,247,0.40);
+    box-shadow: 0 2px 16px rgba(59,130,246,0.30), inset 4px 0 0 #60a5fa;
 }
 
 vaadin-side-nav-item::part(prefix),
 vaadin-side-nav-item::part(suffix) {
-    color: rgba(255,255,255,0.70);
+    color: rgba(148,163,184,0.70);
 }
 
 vaadin-side-nav-item[active]::part(prefix),
 vaadin-side-nav-item[active]::part(suffix) {
-    color: #ffffff;
+    color: #60a5fa;
 }
 
-/* ── Navbar ─────────────────────────────────────────── */
+/* ── Navbar ──────────────────────────────────────────────── */
 vaadin-app-layout::part(navbar) {
-    background: #ffffff;
-    box-shadow: 0 2px 14px rgba(0,0,0,0.10), 0 1px 3px rgba(0,0,0,0.05);
-    border-bottom: 1px solid #e2e8f0;
+    background: #1e293b;
+    box-shadow: 0 2px 16px rgba(0,0,0,0.45), 0 1px 4px rgba(0,0,0,0.30);
+    border-bottom: 1px solid rgba(59,130,246,0.18);
     min-height: 62px;
 }
 
-/* ── Brand block ─────────────────────────────────────── */
+/* ── Brand block ─────────────────────────────────────────── */
 .nav-brand {
     display: flex;
     flex-direction: column;
@@ -110,21 +165,24 @@ vaadin-app-layout::part(navbar) {
 .brand-title {
     font-size: 1.5rem;
     font-weight: 900;
-    color: #0f172a;
+    background: linear-gradient(90deg, #60a5fa 0%, #a78bfa 50%, #34d399 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
     letter-spacing: 0.06em;
-    text-shadow: 0 2px 10px rgba(0,0,0,0.22), 0 1px 3px rgba(0,0,0,0.14);
+    animation: scaleIn 0.6s ease-out;
 }
 
 .brand-version {
     display: inline-block;
     font-size: 0.60rem;
-    background: #1e3a5f;
+    background: linear-gradient(90deg, #3b82f6 0%, #8b5cf6 100%);
     color: white;
     padding: 2px 9px;
     border-radius: 20px;
     font-weight: 700;
     letter-spacing: 0.07em;
-    box-shadow: 0 2px 7px rgba(30,58,95,0.40);
+    box-shadow: 0 2px 8px rgba(59,130,246,0.45);
     vertical-align: middle;
 }
 
@@ -134,109 +192,367 @@ vaadin-app-layout::part(navbar) {
     font-weight: 600;
     letter-spacing: 0.12em;
     text-transform: uppercase;
-    text-shadow: 0 1px 4px rgba(0,0,0,0.10);
 }
 
-/* ── Content area — subtle dot grid ─────────────────── */
-vaadin-app-layout::part(content) {
-    background-color: #eef2f7;
-    background-image:
-        radial-gradient(circle at 1px 1px, rgba(148,163,184,0.28) 1.5px, transparent 0);
-    background-size: 26px 26px;
+/* ── Drawer header watermark ─────────────────────────────── */
+.drawer-watermark {
+    display: block;
+    color: rgba(148,163,184,0.15);
+    font-size: 0.68rem;
+    font-weight: 800;
+    letter-spacing: 0.28em;
+    text-transform: uppercase;
+    padding: 0.7rem 1.25rem 0.3rem;
 }
 
-/* ── Grid ────────────────────────────────────────────── */
+/* ── Grid ────────────────────────────────────────────────── */
 vaadin-grid {
-    border-radius: 13px;
-    box-shadow: 0 4px 22px rgba(0,0,0,0.10), 0 1px 5px rgba(0,0,0,0.05);
-    background: #ffffff;
+    border-radius: 14px;
+    box-shadow: 0 4px 28px rgba(0,0,0,0.50), 0 1px 6px rgba(0,0,0,0.35);
+    background: #1e293b;
     overflow: hidden;
-    border: 1px solid rgba(0,0,0,0.045);
+    border: 1px solid rgba(59,130,246,0.14);
+    animation: slideUp 0.5s ease-out;
+    --lumo-base-color: #1e293b;
+    --lumo-tint-5pct:  rgba(148,163,184,0.05);
+    --lumo-tint-10pct: rgba(148,163,184,0.08);
 }
 
-/* ── Buttons ─────────────────────────────────────────── */
+/* ── Buttons ─────────────────────────────────────────────── */
 vaadin-button::part(button) {
-    box-shadow: 0 2px 7px rgba(0,0,0,0.13), 0 1px 2px rgba(0,0,0,0.07);
-    transition: box-shadow 0.15s, transform 0.1s;
+    background: linear-gradient(135deg, #3b82f6 0%, #6366f1 100%);
+    color: #ffffff;
+    border: none;
+    border-radius: 8px;
+    box-shadow: 0 2px 10px rgba(59,130,246,0.35), 0 1px 3px rgba(0,0,0,0.20);
+    transition: box-shadow 0.18s, transform 0.12s;
+    font-weight: 600;
 }
 
 vaadin-button:hover::part(button) {
-    box-shadow: 0 5px 14px rgba(0,0,0,0.17), 0 2px 4px rgba(0,0,0,0.08);
-    transform: translateY(-1px);
+    box-shadow: 0 5px 18px rgba(59,130,246,0.50), 0 2px 5px rgba(0,0,0,0.25);
+    transform: translateY(-2px);
 }
 
 vaadin-button:active::part(button) {
-    box-shadow: 0 1px 3px rgba(0,0,0,0.10);
+    box-shadow: 0 1px 4px rgba(0,0,0,0.20);
     transform: translateY(0);
 }
 
-/* ── Form fields ─────────────────────────────────────── */
+vaadin-button[theme~="tertiary"]::part(button),
+vaadin-button[theme~="tertiary-inline"]::part(button) {
+    background: transparent;
+    border: 1px solid rgba(59,130,246,0.35);
+    color: #60a5fa;
+    box-shadow: none;
+}
+
+vaadin-button[theme~="tertiary"]:hover::part(button) {
+    background: rgba(59,130,246,0.12);
+    border-color: rgba(59,130,246,0.55);
+    box-shadow: 0 3px 12px rgba(59,130,246,0.22);
+    transform: translateY(-1px);
+}
+
+vaadin-button[theme~="error"]::part(button) {
+    background: linear-gradient(135deg, #f43f5e 0%, #e11d48 100%);
+    box-shadow: 0 2px 10px rgba(244,63,94,0.40);
+}
+
+vaadin-button[theme~="success"]::part(button) {
+    background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+    box-shadow: 0 2px 10px rgba(16,185,129,0.40);
+}
+
+/* ── Form fields ─────────────────────────────────────────── */
 vaadin-text-field::part(input-field),
 vaadin-number-field::part(input-field),
 vaadin-integer-field::part(input-field),
-vaadin-select::part(input-field) {
-    box-shadow: 0 1px 4px rgba(0,0,0,0.07);
-    transition: box-shadow 0.15s;
+vaadin-select::part(input-field),
+vaadin-combo-box::part(input-field) {
+    background: #0f172a;
+    border: 1px solid rgba(59,130,246,0.22);
+    border-radius: 8px;
+    box-shadow: 0 1px 5px rgba(0,0,0,0.30);
+    color: #e2e8f0;
+    transition: border-color 0.18s, box-shadow 0.18s;
 }
 
 vaadin-text-field[focused]::part(input-field),
 vaadin-number-field[focused]::part(input-field),
 vaadin-integer-field[focused]::part(input-field),
-vaadin-select[focused]::part(input-field) {
-    box-shadow: 0 0 0 3px rgba(37,99,235,0.18), 0 1px 4px rgba(0,0,0,0.07);
+vaadin-select[focused]::part(input-field),
+vaadin-combo-box[focused]::part(input-field) {
+    border-color: rgba(59,130,246,0.65);
+    box-shadow: 0 0 0 3px rgba(59,130,246,0.20), 0 1px 5px rgba(0,0,0,0.30);
 }
 
-/* ── Notifications ───────────────────────────────────── */
+vaadin-text-field::part(label),
+vaadin-number-field::part(label),
+vaadin-integer-field::part(label),
+vaadin-select::part(label),
+vaadin-combo-box::part(label) {
+    color: #94a3b8;
+    font-size: 0.82rem;
+    font-weight: 600;
+    letter-spacing: 0.04em;
+}
+
+/* ── Radio buttons ───────────────────────────────────────── */
+vaadin-radio-button::part(radio) {
+    border-color: rgba(59,130,246,0.45);
+    background: #0f172a;
+}
+
+vaadin-radio-button[checked]::part(radio) {
+    border-color: #3b82f6;
+    background: #3b82f6;
+}
+
+/* ── Tabs ────────────────────────────────────────────────── */
+vaadin-tabs {
+    border-bottom: 1px solid rgba(59,130,246,0.18);
+    background: transparent;
+}
+
+vaadin-tab {
+    color: #64748b;
+    font-weight: 500;
+    transition: color 0.18s;
+}
+
+vaadin-tab:hover {
+    color: #94a3b8;
+}
+
+vaadin-tab[selected] {
+    color: #60a5fa;
+    font-weight: 600;
+}
+
+vaadin-tabs::part(tabs-container)::after {
+    background: linear-gradient(90deg, #3b82f6, #8b5cf6);
+}
+
+/* ── TabSheet ────────────────────────────────────────────── */
+vaadin-tab-sheet::part(content) {
+    background: #1e293b;
+    border-radius: 0 0 12px 12px;
+    border: 1px solid rgba(59,130,246,0.12);
+    border-top: none;
+    padding: 1.2rem;
+}
+
+/* ── Notifications ───────────────────────────────────────── */
 vaadin-notification-card {
-    box-shadow: 0 10px 36px rgba(0,0,0,0.20), 0 2px 6px rgba(0,0,0,0.10);
+    box-shadow: 0 10px 40px rgba(0,0,0,0.60), 0 2px 8px rgba(0,0,0,0.35);
     border-radius: 12px;
+    background: #1e293b;
+    border: 1px solid rgba(59,130,246,0.22);
+    animation: slideUp 0.3s ease-out;
 }
 
-/* ── Status badges ───────────────────────────────────── */
+/* ── Number / Integer field step buttons ─────────────────── */
+vaadin-integer-field::part(decrease-button),
+vaadin-integer-field::part(increase-button),
+vaadin-number-field::part(decrease-button),
+vaadin-number-field::part(increase-button) {
+    color: #60a5fa;
+}
+
+/* ── Select dropdown ─────────────────────────────────────── */
+vaadin-select-overlay,
+vaadin-combo-box-overlay {
+    background: #1e293b;
+    border: 1px solid rgba(59,130,246,0.22);
+    border-radius: 10px;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.55);
+}
+
+vaadin-select-item:hover,
+vaadin-combo-box-item:hover {
+    background: rgba(59,130,246,0.14);
+}
+
+vaadin-select-item[selected],
+vaadin-combo-box-item[selected] {
+    background: rgba(59,130,246,0.22);
+    color: #60a5fa;
+    font-weight: 600;
+}
+
+/* ── H2 page titles ──────────────────────────────────────── */
+h2 {
+    background: linear-gradient(90deg, #60a5fa 0%, #a78bfa 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    font-weight: 800;
+    letter-spacing: 0.02em;
+    animation: slideUp 0.45s ease-out;
+}
+
+h4 {
+    color: #94a3b8;
+    font-size: 0.85rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    margin-top: 0.5rem;
+}
+
+/* ── Status badges ───────────────────────────────────────── */
 .badge-normal {
     display: inline-block;
-    background: #dcfce7;
-    color: #14532d;
-    padding: 4px 15px;
+    background: rgba(16,185,129,0.18);
+    color: #34d399;
+    padding: 4px 14px;
     border-radius: 999px;
     font-weight: 700;
-    font-size: 0.83em;
-    letter-spacing: 0.03em;
-    box-shadow: 0 1px 4px rgba(20,83,45,0.15);
+    font-size: 0.80em;
+    letter-spacing: 0.05em;
+    border: 1px solid rgba(52,211,153,0.35);
+    box-shadow: 0 0 8px rgba(52,211,153,0.20);
 }
 
 .badge-warning {
     display: inline-block;
-    background: #fef9c3;
-    color: #713f12;
-    padding: 4px 15px;
+    background: rgba(245,158,11,0.18);
+    color: #fbbf24;
+    padding: 4px 14px;
     border-radius: 999px;
     font-weight: 700;
-    font-size: 0.83em;
-    letter-spacing: 0.03em;
-    box-shadow: 0 1px 4px rgba(113,63,18,0.15);
+    font-size: 0.80em;
+    letter-spacing: 0.05em;
+    border: 1px solid rgba(251,191,36,0.35);
+    box-shadow: 0 0 8px rgba(251,191,36,0.20);
 }
 
 .badge-critical {
     display: inline-block;
-    background: #fee2e2;
-    color: #7f1d1d;
-    padding: 4px 15px;
+    background: rgba(244,63,94,0.18);
+    color: #fb7185;
+    padding: 4px 14px;
     border-radius: 999px;
     font-weight: 700;
-    font-size: 0.83em;
-    letter-spacing: 0.03em;
-    box-shadow: 0 1px 4px rgba(127,29,29,0.18);
+    font-size: 0.80em;
+    letter-spacing: 0.05em;
+    border: 1px solid rgba(251,113,133,0.40);
+    box-shadow: 0 0 10px rgba(244,63,94,0.28);
+    animation: pulseRing 1.8s ease-out infinite;
 }
 
 .badge-offline {
     display: inline-block;
-    background: #f1f5f9;
-    color: #475569;
-    padding: 4px 15px;
+    background: rgba(71,85,105,0.30);
+    color: #94a3b8;
+    padding: 4px 14px;
     border-radius: 999px;
     font-weight: 700;
-    font-size: 0.83em;
-    letter-spacing: 0.03em;
-    box-shadow: 0 1px 4px rgba(0,0,0,0.09);
+    font-size: 0.80em;
+    letter-spacing: 0.05em;
+    border: 1px solid rgba(100,116,139,0.30);
+}
+
+/* ── Sensor card ─────────────────────────────────────────── */
+.sensor-card {
+    background: linear-gradient(135deg, #1e293b 0%, #162032 100%);
+    border-radius: 16px;
+    padding: 1.2rem 1.4rem;
+    border: 1px solid rgba(59,130,246,0.15);
+    box-shadow: 0 4px 20px rgba(0,0,0,0.45);
+    transition: transform 0.25s ease, box-shadow 0.25s ease, border-color 0.25s;
+    animation: scaleIn 0.5s ease-out;
+}
+
+.sensor-card:hover {
+    transform: translateY(-6px);
+    box-shadow: 0 10px 32px rgba(59,130,246,0.22), 0 4px 10px rgba(0,0,0,0.40);
+    border-color: rgba(59,130,246,0.35);
+}
+
+.sensor-card-title {
+    font-size: 0.80rem;
+    font-weight: 700;
+    letter-spacing: 0.10em;
+    text-transform: uppercase;
+    color: #64748b;
+}
+
+.sensor-card-value {
+    font-size: 2.2rem;
+    font-weight: 800;
+    color: #e2e8f0;
+    line-height: 1;
+}
+
+.sensor-card-unit {
+    font-size: 0.85rem;
+    color: #64748b;
+    font-weight: 500;
+    margin-left: 4px;
+    align-self: flex-end;
+}
+
+.sensor-card-value-row {
+    display: flex;
+    align-items: baseline;
+    gap: 4px;
+    margin: 0.4rem 0;
+}
+
+.sensor-card-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: #64748b;
+    margin-left: auto;
+    align-self: center;
+}
+
+.sensor-normal  { border-left: 3px solid #10b981; }
+.sensor-warning { border-left: 3px solid #f59e0b; }
+.sensor-critical {
+    border-left: 3px solid #f43f5e;
+    box-shadow: 0 4px 20px rgba(244,63,94,0.22), 0 4px 10px rgba(0,0,0,0.40);
+}
+
+.sensor-normal  .sensor-card-dot { background: #10b981; box-shadow: 0 0 6px rgba(16,185,129,0.60); }
+.sensor-warning .sensor-card-dot { background: #f59e0b; box-shadow: 0 0 6px rgba(245,158,11,0.60); }
+.sensor-critical .sensor-card-dot {
+    background: #f43f5e;
+    box-shadow: 0 0 8px rgba(244,63,94,0.80);
+    animation: pulseRing 1.4s ease-out infinite;
+}
+
+.sensor-normal  .sensor-card-value { color: #34d399; }
+.sensor-warning .sensor-card-value { color: #fbbf24; }
+.sensor-critical .sensor-card-value { color: #fb7185; }
+
+.sensor-card-bar {
+    --lumo-primary-color: #3b82f6;
+    height: 4px;
+    border-radius: 2px;
+    margin-top: 0.4rem;
+}
+
+/* ── Progress bar ────────────────────────────────────────── */
+vaadin-progress-bar {
+    --lumo-primary-color: #3b82f6;
+    height: 4px;
+    border-radius: 4px;
+    background: rgba(59,130,246,0.14);
+}
+
+/* ── Hr divider ──────────────────────────────────────────── */
+hr {
+    border: none;
+    border-top: 1px solid rgba(59,130,246,0.14);
+    margin: 0.5rem 0;
+}
+
+/* ── VerticalLayout / HorizontalLayout within content ────── */
+vaadin-vertical-layout,
+vaadin-horizontal-layout {
+    color: #e2e8f0;
 }

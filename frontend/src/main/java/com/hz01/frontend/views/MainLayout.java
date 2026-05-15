@@ -55,14 +55,7 @@ public class MainLayout extends AppLayout implements RouterLayout, LocaleChangeO
                 .set("background", "linear-gradient(90deg, #60a5fa 0%, #818cf8 40%, #34d399 100%)");
 
         Span watermark = new Span("HZ-01");
-        watermark.getStyle()
-                .set("display", "block")
-                .set("color", "rgba(255,255,255,0.18)")
-                .set("font-size", "0.68rem")
-                .set("font-weight", "800")
-                .set("letter-spacing", "0.28em")
-                .set("text-transform", "uppercase")
-                .set("padding", "0.7rem 1.25rem 0.3rem");
+        watermark.addClassName("drawer-watermark");
 
         SideNav nav = new SideNav();
         nav.addItem(navDashboard, navAlerts, navThresholds, navControl);
@@ -74,6 +67,7 @@ public class MainLayout extends AppLayout implements RouterLayout, LocaleChangeO
 
     private void buildNavbar() {
         DrawerToggle toggle = new DrawerToggle();
+        toggle.getStyle().set("color", "#94a3b8");
 
         // Brand — absolutely centered in the navbar
         Div brand = new Div();
@@ -113,6 +107,9 @@ public class MainLayout extends AppLayout implements RouterLayout, LocaleChangeO
         Select<String> langSelect = new Select<>();
         langSelect.setItems(LOCALES.keySet().stream().toList());
         langSelect.setValue(currentLang);
+        langSelect.getStyle()
+                .set("--lumo-base-color", "#1e293b")
+                .set("--lumo-body-text-color", "#94a3b8");
         langSelect.addValueChangeListener(e -> {
             if (e.isFromClient()) {
                 Locale locale = LOCALES.getOrDefault(e.getValue(), HZ01I18nProvider.LOCALE_ZH);
