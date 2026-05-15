@@ -31,7 +31,7 @@ check_port() {
 }
 
 check_port 8000
-check_port 1011
+check_port 8080
 
 # 启动 MySQL
 log "确认 MySQL 运行中..."
@@ -73,7 +73,7 @@ log "Frontend PID: $FRONTEND_PID (首次启动需要编译，约 2-3 分钟)"
 
 log ""
 log "=== 服务已启动 ==="
-log "Frontend UI : http://localhost:1011"
+log "Frontend UI : http://localhost:8080"
 log "Backend API : http://localhost:8000"
 log "API 文档    : http://localhost:8000/docs"
 log ""

@@ -29,7 +29,7 @@ stop_service() {
         # 按端口兜底查找
         case $name in
             backend)  PORT=8000 ;;
-            frontend) PORT=1011 ;;
+            frontend) PORT=8080 ;;
         esac
         PID=$(lsof -ti ":$PORT" 2>/dev/null || true)
         if [ -n "$PID" ]; then
