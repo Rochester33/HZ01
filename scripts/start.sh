@@ -41,7 +41,7 @@ sudo systemctl start mysql 2>/dev/null || sudo service mysql start 2>/dev/null |
 log "启动 Backend (port 8000)..."
 cd "$ROOT_DIR/backend"
 source .venv/bin/activate
-nohup uvicorn app.main:app \
+nohup uvicorn main:app \
     --host 0.0.0.0 \
     --port 8000 \
     --workers 1 \
