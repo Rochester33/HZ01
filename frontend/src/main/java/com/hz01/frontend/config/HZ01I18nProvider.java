@@ -36,7 +36,7 @@ public class HZ01I18nProvider implements I18NProvider {
             bundle = ResourceBundle.getBundle("i18n/messages", locale);
         } catch (MissingResourceException e) {
             log.warn("Missing i18n bundle for locale {}", locale);
-            bundle = ResourceBundle.getBundle("i18n/messages", LOCALE_ZH);
+            bundle = ResourceBundle.getBundle("i18n/messages", LOCALE_EN);
         }
         try {
             String pattern = bundle.getString(key);

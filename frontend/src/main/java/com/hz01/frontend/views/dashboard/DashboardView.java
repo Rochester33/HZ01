@@ -19,7 +19,8 @@ import com.vaadin.flow.router.Route;
 import reactor.core.Disposable;
 
 import java.util.ArrayList;
-import java.util.List;
+import java.util.LinkedHashMap;
+import java.util.Map;
 
 @Route(value = "", layout = MainLayout.class)
 @PageTitle("HZ-01 Dashboard")
@@ -29,7 +30,8 @@ public class DashboardView extends VerticalLayout implements LocaleChangeObserve
     private final RealtimeEventBus eventBus;
 
     private final Grid<SensorReadingDto> grid = new Grid<>(SensorReadingDto.class, false);
-    private final List<SensorReadingDto> readings = new ArrayList<>();
+    /** Keyed by deviceId so WebSocket updates replace rather than duplicate/remove entries */
+    private final Map<String, SensorReadingDto> readingsMap = new LinkedHashMap<>();
     private final H2 title = new H2();
     private Disposable subscription;
 
@@ -59,10 +61,7 @@ public class DashboardView extends VerticalLayout implements LocaleChangeObserve
         grid.addColumn(r -> formatVal(r.batteryLevel(), "%")).setHeader(getTranslation("sensor.battery")).setAutoWidth(true);
         grid.addComponentColumn(r -> statusBadge(r)).setHeader(getTranslation("sensor.status")).setAutoWidth(true);
 
-        grid.setClassNameGenerator(r -> {
-            String level = computeLevel(r);
-            return "row-" + level;
-        });
+        grid.setClassNameGenerator(r -> "row-" + computeLevel(r));
     }
 
     private String formatVal(Double val, String unit) {
@@ -89,9 +88,9 @@ public class DashboardView extends VerticalLayout implements LocaleChangeObserve
     }
 
     private void loadData() {
-        readings.clear();
-        readings.addAll(sensorApiClient.getLatestReadings());
-        grid.setItems(readings);
+        readingsMap.clear();
+        sensorApiClient.getLatestReadings().forEach(r -> readingsMap.put(r.deviceId(), r));
+        grid.setItems(new ArrayList<>(readingsMap.values()));
     }
 
     @Override
@@ -99,12 +98,12 @@ public class DashboardView extends VerticalLayout implements LocaleChangeObserve
         UI ui = event.getUI();
         subscription = eventBus.subscribeReadings().subscribe(msg -> {
             ui.access(() -> {
-                readings.removeIf(r -> r.deviceId().equals(msg.deviceId()));
-                readings.add(new SensorReadingDto(
+                // Replace the entry for this device — never removes other devices
+                readingsMap.put(msg.deviceId(), new SensorReadingDto(
                         null, msg.deviceId(),
                         msg.temperature(), msg.humidity(), msg.oxygen(),
                         msg.coLevel(), msg.batteryLevel(), null, null));
-                grid.setItems(new ArrayList<>(readings));
+                grid.setItems(new ArrayList<>(readingsMap.values()));
             });
         });
     }
@@ -117,9 +116,8 @@ public class DashboardView extends VerticalLayout implements LocaleChangeObserve
     @Override
     public void localeChange(LocaleChangeEvent event) {
         title.setText(getTranslation("nav.dashboard"));
-        grid.getColumns().forEach(col -> col.setVisible(false));
         grid.removeAllColumns();
         configureGrid();
-        grid.setItems(readings);
+        grid.setItems(new ArrayList<>(readingsMap.values()));
     }
 }

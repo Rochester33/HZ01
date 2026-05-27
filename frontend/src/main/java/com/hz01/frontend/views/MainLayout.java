@@ -94,15 +94,17 @@ public class MainLayout extends AppLayout implements RouterLayout, LocaleChangeO
         brand.add(titleRow, brandSub);
 
         // Language selector — right side
+        // Default to English if no session locale is set or if it's the JVM default
         Locale sessionLocale = VaadinSession.getCurrent() != null
                 ? VaadinSession.getCurrent().getLocale()
-                : HZ01I18nProvider.LOCALE_ZH;
+                : HZ01I18nProvider.LOCALE_EN;
 
+        // If the session locale doesn't match any of our supported locales, fall back to English
         String currentLang = LOCALES.entrySet().stream()
                 .filter(e -> e.getValue().getLanguage().equals(sessionLocale.getLanguage()))
                 .map(Map.Entry::getKey)
                 .findFirst()
-                .orElse("中文");
+                .orElse("English");
 
         Select<String> langSelect = new Select<>();
         langSelect.setItems(LOCALES.keySet().stream().toList());
