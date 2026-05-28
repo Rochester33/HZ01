@@ -7,12 +7,11 @@ import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.formlayout.FormLayout;
 import com.vaadin.flow.component.html.H2;
-import com.vaadin.flow.component.html.H4;
-import com.vaadin.flow.component.html.Hr;
 import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.component.notification.NotificationVariant;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
+import com.vaadin.flow.component.select.Select;
 import com.vaadin.flow.component.textfield.NumberField;
 import com.vaadin.flow.i18n.LocaleChangeEvent;
 import com.vaadin.flow.i18n.LocaleChangeObserver;
@@ -29,83 +28,114 @@ public class ThresholdView extends VerticalLayout implements LocaleChangeObserve
 
     private final AlertApiClient alertApiClient;
 
-    // sensor_type -> {field -> NumberField}
-    private final Map<String, Map<String, NumberField>> fields = new HashMap<>();
-
     private static final List<String> SENSORS = List.of(
             "temperature", "humidity", "oxygen", "co_level", "battery_level");
+
+    private Select<String> sensorSelect;
+    private NumberField warnMin;
+    private NumberField warnMax;
+    private NumberField critMin;
+    private NumberField critMax;
+    private FormLayout form;
+    private Button saveBtn;
+
+    // Cache loaded thresholds
+    private Map<String, AlertThresholdDto> byType = new HashMap<>();
 
     public ThresholdView(AlertApiClient alertApiClient) {
         this.alertApiClient = alertApiClient;
         setSizeFull();
         setPadding(true);
-        buildForm();
+        setAlignItems(Alignment.STRETCH);
+        buildUI();
     }
 
-    private void buildForm() {
+    private void buildUI() {
         removeAll();
-        fields.clear();
 
         add(new H2(getTranslation("nav.thresholds")));
 
-        FormLayout form = new FormLayout();
-        form.setResponsiveSteps(
-                new FormLayout.ResponsiveStep("0", 1),
-                new FormLayout.ResponsiveStep("600px", 2));
-
+        // Load current thresholds
         List<AlertThresholdDto> thresholds = alertApiClient.getThresholds();
-        Map<String, AlertThresholdDto> byType = new HashMap<>();
+        byType.clear();
         thresholds.forEach(t -> byType.put(t.sensorType(), t));
 
-        for (String sensor : SENSORS) {
-            AlertThresholdDto t = byType.get(sensor);
-            String label = getTranslation("sensor." + sensor.replace("_level", "").replace("co_", "co"));
-            String unit = t != null && t.unit() != null ? " (" + t.unit() + ")" : "";
+        // Sensor dropdown
+        sensorSelect = new Select<>();
+        sensorSelect.setLabel(getTranslation("threshold.select.sensor"));
+        sensorSelect.setItems(SENSORS);
+        sensorSelect.setItemLabelGenerator(this::sensorLabel);
+        sensorSelect.setWidth("300px");
 
-            form.add(new H4(label + unit), 2);
-
-            NumberField warnMin = field(getTranslation("threshold.warning.level") + " Min", t != null ? t.warningMin() : null);
-            NumberField warnMax = field(getTranslation("threshold.warning.level") + " Max", t != null ? t.warningMax() : null);
-            NumberField critMin = field(getTranslation("threshold.critical.level") + " Min", t != null ? t.criticalMin() : null);
-            NumberField critMax = field(getTranslation("threshold.critical.level") + " Max", t != null ? t.criticalMax() : null);
-
-            form.add(warnMin, warnMax, critMin, critMax);
-            form.add(new Hr(), 2);
-
-            Map<String, NumberField> sensorFields = new HashMap<>();
-            sensorFields.put("warnMin", warnMin);
-            sensorFields.put("warnMax", warnMax);
-            sensorFields.put("critMin", critMin);
-            sensorFields.put("critMax", critMax);
-            fields.put(sensor, sensorFields);
+        // Fields
+        warnMin = new NumberField(getTranslation("threshold.warning.level") + " Min");
+        warnMax = new NumberField(getTranslation("threshold.warning.level") + " Max");
+        critMin = new NumberField(getTranslation("threshold.critical.level") + " Min");
+        critMax = new NumberField(getTranslation("threshold.critical.level") + " Max");
+        for (NumberField f : new NumberField[]{warnMin, warnMax, critMin, critMax}) {
+            f.setClearButtonVisible(true);
+            f.setVisible(false);
         }
 
-        Button save = new Button(getTranslation("threshold.save"), e -> save());
-        save.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
+        form = new FormLayout();
+        form.setResponsiveSteps(
+                new FormLayout.ResponsiveStep("0", 1),
+                new FormLayout.ResponsiveStep("500px", 2));
+        form.add(warnMin, warnMax, critMin, critMax);
 
-        add(form, new HorizontalLayout(save));
+        saveBtn = new Button(getTranslation("threshold.save"), e -> save());
+        saveBtn.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
+        saveBtn.setVisible(false);
+
+        sensorSelect.addValueChangeListener(e -> onSensorSelected(e.getValue()));
+
+        // Default: select first sensor
+        sensorSelect.setValue(SENSORS.get(0));
+
+        add(sensorSelect, form, new HorizontalLayout(saveBtn));
     }
 
-    private NumberField field(String label, Double value) {
-        NumberField f = new NumberField(label);
-        if (value != null) f.setValue(value);
-        f.setClearButtonVisible(true);
-        return f;
+    private String sensorLabel(String sensor) {
+        String key = sensor.replace("_level", "").replace("co_", "co");
+        return getTranslation("sensor." + key);
+    }
+
+    private void onSensorSelected(String sensor) {
+        if (sensor == null) return;
+
+        AlertThresholdDto t = byType.get(sensor);
+        String unit = t != null && t.unit() != null ? " (" + t.unit() + ")" : "";
+
+        warnMin.setLabel(getTranslation("threshold.warning.level") + " Min" + unit);
+        warnMax.setLabel(getTranslation("threshold.warning.level") + " Max" + unit);
+        critMin.setLabel(getTranslation("threshold.critical.level") + " Min" + unit);
+        critMax.setLabel(getTranslation("threshold.critical.level") + " Max" + unit);
+
+        warnMin.setValue(t != null && t.warningMin() != null ? t.warningMin() : null);
+        warnMax.setValue(t != null && t.warningMax() != null ? t.warningMax() : null);
+        critMin.setValue(t != null && t.criticalMin() != null ? t.criticalMin() : null);
+        critMax.setValue(t != null && t.criticalMax() != null ? t.criticalMax() : null);
+
+        for (NumberField f : new NumberField[]{warnMin, warnMax, critMin, critMax}) {
+            f.setVisible(true);
+        }
+        saveBtn.setVisible(true);
     }
 
     private void save() {
+        String sensor = sensorSelect.getValue();
+        if (sensor == null) return;
         try {
-            for (String sensor : SENSORS) {
-                Map<String, NumberField> f = fields.get(sensor);
-                AlertThresholdDto dto = new AlertThresholdDto(
-                        null, null, sensor,
-                        f.get("warnMin").getValue(),
-                        f.get("warnMax").getValue(),
-                        f.get("critMin").getValue(),
-                        f.get("critMax").getValue(),
-                        null, null);
-                alertApiClient.upsertThreshold(dto);
-            }
+            AlertThresholdDto dto = new AlertThresholdDto(
+                    null, null, sensor,
+                    warnMin.getValue(),
+                    warnMax.getValue(),
+                    critMin.getValue(),
+                    critMax.getValue(),
+                    null, null);
+            alertApiClient.upsertThreshold(dto);
+            // Refresh cache
+            byType.put(sensor, dto);
             Notification n = Notification.show(getTranslation("threshold.save.success"), 3000,
                     Notification.Position.BOTTOM_END);
             n.addThemeVariants(NotificationVariant.LUMO_SUCCESS);
@@ -118,6 +148,6 @@ public class ThresholdView extends VerticalLayout implements LocaleChangeObserve
 
     @Override
     public void localeChange(LocaleChangeEvent event) {
-        buildForm();
+        buildUI();
     }
 }

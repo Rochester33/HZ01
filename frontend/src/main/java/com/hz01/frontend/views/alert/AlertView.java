@@ -45,10 +45,12 @@ public class AlertView extends VerticalLayout implements LocaleChangeObserver {
         this.eventBus = eventBus;
         setSizeFull();
         setPadding(true);
+        setAlignItems(Alignment.STRETCH);
 
         H2 title = new H2(getTranslation("nav.alerts"));
         Button refresh = new Button(getTranslation("common.refresh"), e -> loadData());
         HorizontalLayout toolbar = new HorizontalLayout(title, refresh);
+        toolbar.setWidthFull();
         toolbar.setDefaultVerticalComponentAlignment(Alignment.CENTER);
         toolbar.expand(title);
 
