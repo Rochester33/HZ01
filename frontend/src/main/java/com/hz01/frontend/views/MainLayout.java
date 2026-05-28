@@ -33,8 +33,8 @@ public class MainLayout extends AppLayout implements RouterLayout, LocaleChangeO
     private static final Map<String, Locale> LOCALES = new LinkedHashMap<>();
 
     static {
-        LOCALES.put("中文",     HZ01I18nProvider.LOCALE_ZH);
         LOCALES.put("English",  HZ01I18nProvider.LOCALE_EN);
+        LOCALES.put("中文",     HZ01I18nProvider.LOCALE_ZH);
         LOCALES.put("Русский",  HZ01I18nProvider.LOCALE_RU);
         LOCALES.put("Français", HZ01I18nProvider.LOCALE_FR);
         LOCALES.put("Deutsch",  HZ01I18nProvider.LOCALE_DE);
@@ -114,7 +114,7 @@ public class MainLayout extends AppLayout implements RouterLayout, LocaleChangeO
                 .set("--lumo-body-text-color", "#94a3b8");
         langSelect.addValueChangeListener(e -> {
             if (e.isFromClient()) {
-                Locale locale = LOCALES.getOrDefault(e.getValue(), HZ01I18nProvider.LOCALE_ZH);
+                Locale locale = LOCALES.getOrDefault(e.getValue(), HZ01I18nProvider.LOCALE_EN);
                 VaadinSession.getCurrent().setLocale(locale);
                 UI.getCurrent().getPage().reload();
             }
