@@ -2,8 +2,11 @@ import dht
 import machine
 import time
 import json
-import network
 import urequests
+
+# ── Connection mode: uncomment ONE of the two lines below ─────────────────────
+from wifi import connect_wifi, BACKEND_URL   # Wi-Fi (default)
+# from bluetooth import connect_bluetooth, send_data, receive_command  # BLE alternative
 
 # ── Pin configuration ────────────────────────────────────────────────────────
 dht_pin  = machine.Pin(4)
@@ -22,11 +25,8 @@ mq4_pin.atten(machine.ADC.ATTN_11DB)
 mq7_pin  = machine.ADC(machine.Pin(14))
 mq7_pin.atten(machine.ADC.ATTN_11DB)
 
-# ── Device / network config ───────────────────────────────────────────────────
+# ── Device config ─────────────────────────────────────────────────────────────
 DEVICE_ID   = "Device_001"
-WIFI_SSID   = "YOUR_SSID"
-WIFI_PASS   = "YOUR_PASSWORD"
-BACKEND_URL = "http://192.168.1.100:8000"   # update to your server IP
 
 # ── Alert thresholds ──────────────────────────────────────────────────────────
 TEMP_THRESHOLD     = 40
@@ -38,19 +38,6 @@ MQ7_THRESHOLD      = 2000
 # ── State ─────────────────────────────────────────────────────────────────────
 buzzer_manual_on = False   # True = manually forced ON; None = auto mode
 led_manual_on    = False
-
-
-# ── Wi-Fi ─────────────────────────────────────────────────────────────────────
-def connect_wifi():
-    wlan = network.WLAN(network.STA_IF)
-    wlan.active(True)
-    if not wlan.isconnected():
-        wlan.connect(WIFI_SSID, WIFI_PASS)
-        for _ in range(20):
-            if wlan.isconnected():
-                break
-            time.sleep(0.5)
-    return wlan.isconnected()
 
 
 # ── Sensor helpers ────────────────────────────────────────────────────────────
