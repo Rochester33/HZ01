@@ -13,6 +13,7 @@ class CommandAction(str, Enum):
     on = "on"
     off = "off"
     blink = "blink"
+    sos = "sos"
 
 
 class CommandCreate(BaseModel):

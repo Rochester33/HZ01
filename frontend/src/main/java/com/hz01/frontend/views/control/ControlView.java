@@ -8,16 +8,15 @@ import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.html.H2;
 import com.vaadin.flow.component.html.H4;
+import com.vaadin.flow.component.html.Paragraph;
 import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.component.notification.NotificationVariant;
 import com.vaadin.flow.component.orderedlayout.FlexComponent;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
-import com.vaadin.flow.component.radiobutton.RadioButtonGroup;
 import com.vaadin.flow.component.select.Select;
 import com.vaadin.flow.component.tabs.Tab;
 import com.vaadin.flow.component.tabs.TabSheet;
-import com.vaadin.flow.component.textfield.IntegerField;
 import com.vaadin.flow.i18n.LocaleChangeEvent;
 import com.vaadin.flow.i18n.LocaleChangeObserver;
 import com.vaadin.flow.router.PageTitle;
@@ -55,69 +54,94 @@ public class ControlView extends VerticalLayout implements LocaleChangeObserver 
         deviceSelect.setWidthFull();
 
         TabSheet tabs = new TabSheet();
-        tabs.add(new Tab(getTranslation("control.buzzer")), buildCommandPanel("buzzer"));
-        tabs.add(new Tab(getTranslation("control.led")), buildCommandPanel("led"));
+        tabs.add(new Tab(getTranslation("control.buzzer")), buildTogglePanel("buzzer"));
+        tabs.add(new Tab(getTranslation("control.led")), buildLedPanel());
         tabs.setWidthFull();
 
         add(deviceSelect, tabs);
     }
 
-    private VerticalLayout buildCommandPanel(String type) {
-        RadioButtonGroup<String> actionGroup = new RadioButtonGroup<>();
-        actionGroup.setLabel(getTranslation("control.action"));
-        actionGroup.setItems(
-                getTranslation("control.action.on"),
-                getTranslation("control.action.off"),
-                getTranslation("control.action.blink"));
-        actionGroup.setValue(getTranslation("control.action.on"));
+    /**
+     * Build a simple ON/OFF toggle panel for a given device type (buzzer or led).
+     */
+    private VerticalLayout buildTogglePanel(String type) {
+        Button onBtn = new Button(getTranslation("control.action.on"));
+        onBtn.addThemeVariants(ButtonVariant.LUMO_SUCCESS, ButtonVariant.LUMO_PRIMARY);
+        onBtn.addClickListener(e -> sendCommand(type, "on", 0));
 
-        IntegerField durationField = new IntegerField(getTranslation("control.duration"));
-        durationField.setValue(5);
-        durationField.setMin(0);
-        durationField.setMax(3600);
-        durationField.setStepButtonsVisible(true);
+        Button offBtn = new Button(getTranslation("control.action.off"));
+        offBtn.addThemeVariants(ButtonVariant.LUMO_ERROR);
+        offBtn.addClickListener(e -> sendCommand(type, "off", 0));
 
-        Button sendBtn = new Button(getTranslation("control.send"));
-        sendBtn.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
-        sendBtn.addClickListener(e -> {
-            String deviceId = deviceSelect.getValue();
-            if (deviceId == null) return;
-
-            String actionLabel = actionGroup.getValue();
-            String action = labelToAction(actionLabel);
-            int duration = durationField.getValue() != null ? durationField.getValue() : 0;
-
-            boolean ok = "buzzer".equals(type)
-                    ? commandService.sendBuzzer(deviceId, action, duration)
-                    : commandService.sendLed(deviceId, action, duration);
-
-            Notification n = Notification.show(
-                    ok ? getTranslation("control.send.success") : getTranslation("control.send.fail"),
-                    3000, Notification.Position.BOTTOM_END);
-            n.addThemeVariants(ok ? NotificationVariant.LUMO_SUCCESS : NotificationVariant.LUMO_ERROR);
-        });
+        HorizontalLayout btnRow = new HorizontalLayout(onBtn, offBtn);
+        btnRow.setSpacing(true);
+        btnRow.setPadding(false);
+        btnRow.setAlignItems(FlexComponent.Alignment.CENTER);
 
         VerticalLayout panel = new VerticalLayout(
                 new H4(getTranslation("control." + type)),
-                actionGroup,
-                buildSendRow(durationField, sendBtn));
+                btnRow);
         panel.setPadding(true);
         return panel;
     }
 
-    private HorizontalLayout buildSendRow(IntegerField durationField, Button sendBtn) {
-        HorizontalLayout row = new HorizontalLayout(durationField, sendBtn);
-        row.setAlignItems(FlexComponent.Alignment.END);
-        row.setPadding(false);
-        return row;
+    /**
+     * Build the LED panel with ON/OFF toggles and an SOS button.
+     * SOS triggers a three-short three-long three-short blink pattern on the ESP32 power LED,
+     * with the buzzer synchronized.
+     */
+    private VerticalLayout buildLedPanel() {
+        Button onBtn = new Button(getTranslation("control.action.on"));
+        onBtn.addThemeVariants(ButtonVariant.LUMO_SUCCESS, ButtonVariant.LUMO_PRIMARY);
+        onBtn.addClickListener(e -> sendCommand("led", "on", 0));
+
+        Button offBtn = new Button(getTranslation("control.action.off"));
+        offBtn.addThemeVariants(ButtonVariant.LUMO_ERROR);
+        offBtn.addClickListener(e -> sendCommand("led", "off", 0));
+
+        Button sosBtn = new Button(getTranslation("control.action.sos"));
+        sosBtn.addThemeVariants(ButtonVariant.LUMO_ERROR, ButtonVariant.LUMO_PRIMARY);
+        sosBtn.getStyle().set("font-weight", "bold");
+        sosBtn.addClickListener(e -> {
+            String deviceId = deviceSelect.getValue();
+            if (deviceId == null) return;
+            // Send SOS to both LED and buzzer so they are synchronized
+            boolean ledOk = commandService.sendLed(deviceId, "sos", 0);
+            boolean buzzerOk = commandService.sendBuzzer(deviceId, "sos", 0);
+            boolean ok = ledOk && buzzerOk;
+            showNotification(ok);
+        });
+
+        Paragraph sosDesc = new Paragraph(getTranslation("control.sos.description"));
+        sosDesc.getStyle().set("color", "var(--lumo-secondary-text-color)").set("font-size", "var(--lumo-font-size-s)");
+
+        HorizontalLayout btnRow = new HorizontalLayout(onBtn, offBtn, sosBtn);
+        btnRow.setSpacing(true);
+        btnRow.setPadding(false);
+        btnRow.setAlignItems(FlexComponent.Alignment.CENTER);
+
+        VerticalLayout panel = new VerticalLayout(
+                new H4(getTranslation("control.led")),
+                btnRow,
+                sosDesc);
+        panel.setPadding(true);
+        return panel;
     }
 
-    private String labelToAction(String label) {
-        if (label == null) return "on";
-        String lower = label.toLowerCase();
-        if (lower.contains("off") || lower.contains("关") || lower.contains("mati")) return "off";
-        if (lower.contains("blink") || lower.contains("闪") || lower.contains("berkelip")) return "blink";
-        return "on";
+    private void sendCommand(String type, String action, int duration) {
+        String deviceId = deviceSelect.getValue();
+        if (deviceId == null) return;
+        boolean ok = "buzzer".equals(type)
+                ? commandService.sendBuzzer(deviceId, action, duration)
+                : commandService.sendLed(deviceId, action, duration);
+        showNotification(ok);
+    }
+
+    private void showNotification(boolean ok) {
+        Notification n = Notification.show(
+                ok ? getTranslation("control.send.success") : getTranslation("control.send.fail"),
+                3000, Notification.Position.BOTTOM_END);
+        n.addThemeVariants(ok ? NotificationVariant.LUMO_SUCCESS : NotificationVariant.LUMO_ERROR);
     }
 
     @Override
