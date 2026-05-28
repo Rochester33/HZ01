@@ -2,11 +2,19 @@ import dht
 import machine
 import time
 import json
-import urequests
+import sys
 
 # ── Connection mode: uncomment ONE of the two lines below ─────────────────────
-from wifi import connect_wifi, BACKEND_URL   # Wi-Fi (default)
-# from bluetooth import connect_bluetooth, send_data, receive_command  # BLE alternative
+# Mode A: Wi-Fi — ESP32 connects directly to the cloud backend
+# from wifi import connect_wifi, BACKEND_URL
+# import urequests
+
+# Mode B: Serial — PC runs serial_forwarder.py as the network bridge (default)
+SERIAL_MODE = True   # set False to switch back to Wi-Fi mode
+
+if not SERIAL_MODE:
+    from wifi import connect_wifi, BACKEND_URL
+    import urequests
 
 # ── Pin configuration ────────────────────────────────────────────────────────
 dht_pin  = machine.Pin(4)
@@ -93,7 +101,80 @@ def play_sos():
         _pulse(SHORT_MS)
 
 
-# ── Command polling ───────────────────────────────────────────────────────────
+# ── Command execution (shared by both Wi-Fi and Serial modes) ─────────────────
+def execute_command(cmd):
+    """Execute a single command dict {command_type, action, id?}."""
+    global buzzer_manual_on, led_manual_on
+
+    cmd_type = cmd.get("command_type")
+    action   = cmd.get("action")
+
+    if action == "sos":
+        play_sos()
+
+    elif cmd_type == "buzzer":
+        if action == "on":
+            buzzer_manual_on = True
+            buzzer.value(1)
+        elif action == "off":
+            buzzer_manual_on = False
+            buzzer.value(0)
+        elif action == "blink":
+            for _ in range(5):
+                buzzer.value(1)
+                time.sleep_ms(500)
+                buzzer.value(0)
+                time.sleep_ms(500)
+
+    elif cmd_type == "led":
+        if action == "on":
+            led_manual_on = True
+            led.value(1)
+        elif action == "off":
+            led_manual_on = False
+            led.value(0)
+        elif action == "blink":
+            for _ in range(5):
+                led.value(1)
+                time.sleep_ms(500)
+                led.value(0)
+                time.sleep_ms(500)
+
+
+# ── Serial-mode: read inbound commands from stdin ─────────────────────────────
+def read_serial_commands():
+    """
+    Non-blocking read of any complete JSON lines waiting on stdin.
+    serial_forwarder.py writes one JSON command per line, e.g.:
+      {"command_type": "buzzer", "action": "on", "id": 42}
+    """
+    # MicroPython's sys.stdin.read() would block; poll with select instead
+    try:
+        import select
+        r, _, _ = select.select([sys.stdin], [], [], 0)
+        if not r:
+            return
+        line = sys.stdin.readline()
+    except Exception:
+        # Fallback for environments without select
+        try:
+            line = sys.stdin.readline()
+        except Exception:
+            return
+
+    if not line:
+        return
+    line = line.strip()
+    if not line:
+        return
+    try:
+        cmd = json.loads(line)
+        execute_command(cmd)
+    except ValueError:
+        pass   # not JSON — ignore (could be debug output echoed back)
+
+
+# ── Wi-Fi mode: HTTP polling helpers ─────────────────────────────────────────
 def acknowledge_command(cmd_id):
     try:
         urequests.patch(
@@ -104,7 +185,7 @@ def acknowledge_command(cmd_id):
 
 
 def poll_commands():
-    """Fetch pending commands and execute each one."""
+    """Fetch pending commands from server and execute each one (Wi-Fi mode)."""
     global buzzer_manual_on, led_manual_on
     try:
         url  = "{}/api/v1/commands/pending/{}".format(BACKEND_URL, DEVICE_ID)
@@ -115,52 +196,22 @@ def poll_commands():
         return
 
     for cmd in cmds:
-        cmd_type = cmd.get("command_type")
-        action   = cmd.get("action")
-        cmd_id   = cmd.get("id")
+        execute_command(cmd)
+        acknowledge_command(cmd.get("id"))
 
-        if action == "sos":
-            # SOS overrides both channels; play the pattern once
-            play_sos()
 
-        elif cmd_type == "buzzer":
-            if action == "on":
-                buzzer_manual_on = True
-                buzzer.value(1)
-            elif action == "off":
-                buzzer_manual_on = False
-                buzzer.value(0)
-            elif action == "blink":
-                # Simple blink: 5 × 500 ms
-                for _ in range(5):
-                    buzzer.value(1)
-                    time.sleep_ms(500)
-                    buzzer.value(0)
-                    time.sleep_ms(500)
+# ── Startup ───────────────────────────────────────────────────────────────────
+if not SERIAL_MODE:
+    connect_wifi()
 
-        elif cmd_type == "led":
-            if action == "on":
-                led_manual_on = True
-                led.value(1)
-            elif action == "off":
-                led_manual_on = False
-                led.value(0)
-            elif action == "blink":
-                for _ in range(5):
-                    led.value(1)
-                    time.sleep_ms(500)
-                    led.value(0)
-                    time.sleep_ms(500)
-
-        acknowledge_command(cmd_id)
-
+poll_tick = 0   # used only in Wi-Fi mode (poll every ~5 s)
 
 # ── Main loop ─────────────────────────────────────────────────────────────────
-connect_wifi()
-
-poll_tick = 0   # poll commands every ~5 s (5 × 1 s sleep iterations)
-
 while True:
+    # In serial mode, check for inbound commands on every iteration
+    if SERIAL_MODE:
+        read_serial_commands()
+
     temp, humidity = read_dht()
     mq4_value      = read_mq4()
     mq7_value      = read_mq7()
@@ -196,10 +247,11 @@ while True:
             "status":      status
         }))
 
-    # Poll for remote commands every 5 iterations (~5 s)
-    poll_tick += 1
-    if poll_tick >= 5:
-        poll_commands()
-        poll_tick = 0
+    # Wi-Fi mode: poll for commands every 5 iterations (~5 s)
+    if not SERIAL_MODE:
+        poll_tick += 1
+        if poll_tick >= 5:
+            poll_commands()
+            poll_tick = 0
 
     time.sleep(1)

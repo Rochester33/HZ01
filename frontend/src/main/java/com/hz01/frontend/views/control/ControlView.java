@@ -6,9 +6,11 @@ import com.hz01.frontend.service.CommandService;
 import com.hz01.frontend.views.MainLayout;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
+import com.vaadin.flow.component.checkbox.Checkbox;
 import com.vaadin.flow.component.html.H2;
 import com.vaadin.flow.component.html.H4;
 import com.vaadin.flow.component.html.Paragraph;
+import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.component.notification.NotificationVariant;
 import com.vaadin.flow.component.orderedlayout.FlexComponent;
@@ -56,6 +58,7 @@ public class ControlView extends VerticalLayout implements LocaleChangeObserver 
         TabSheet tabs = new TabSheet();
         tabs.add(new Tab(getTranslation("control.buzzer")), buildTogglePanel("buzzer"));
         tabs.add(new Tab(getTranslation("control.led")), buildLedPanel());
+        tabs.add(new Tab(getTranslation("control.emergency")), buildEmergencyPanel());
         tabs.setWidthFull();
 
         add(deviceSelect, tabs);
@@ -85,45 +88,43 @@ public class ControlView extends VerticalLayout implements LocaleChangeObserver 
         return panel;
     }
 
-    /**
-     * Build the LED panel with ON/OFF toggles and an SOS button.
-     * SOS triggers a three-short three-long three-short blink pattern on the ESP32 power LED,
-     * with the buzzer synchronized.
-     */
     private VerticalLayout buildLedPanel() {
-        Button onBtn = new Button(getTranslation("control.action.on"));
-        onBtn.addThemeVariants(ButtonVariant.LUMO_SUCCESS, ButtonVariant.LUMO_PRIMARY);
-        onBtn.addClickListener(e -> sendCommand("led", "on", 0));
+        return buildTogglePanel("led");
+    }
 
-        Button offBtn = new Button(getTranslation("control.action.off"));
-        offBtn.addThemeVariants(ButtonVariant.LUMO_ERROR);
-        offBtn.addClickListener(e -> sendCommand("led", "off", 0));
+    /**
+     * Emergency panel — contains the SOS button which triggers synchronized LED + buzzer SOS pattern.
+     */
+    private VerticalLayout buildEmergencyPanel() {
+        Span sosLabel = new Span("⚠ " + getTranslation("control.sos.label"));
+        sosLabel.getStyle()
+                .set("color", "white")
+                .set("font-weight", "bold")
+                .set("font-size", "var(--lumo-font-size-m)");
 
         Button sosBtn = new Button(getTranslation("control.action.sos"));
         sosBtn.addThemeVariants(ButtonVariant.LUMO_ERROR, ButtonVariant.LUMO_PRIMARY);
-        sosBtn.getStyle().set("font-weight", "bold");
+        sosBtn.getStyle().set("font-weight", "bold").set("margin-left", "auto");
         sosBtn.addClickListener(e -> {
             String deviceId = deviceSelect.getValue();
             if (deviceId == null) return;
-            // Send SOS to both LED and buzzer so they are synchronized
             boolean ledOk = commandService.sendLed(deviceId, "sos", 0);
             boolean buzzerOk = commandService.sendBuzzer(deviceId, "sos", 0);
-            boolean ok = ledOk && buzzerOk;
-            showNotification(ok);
+            showNotification(ledOk && buzzerOk);
         });
+
+        HorizontalLayout sosRow = new HorizontalLayout(sosLabel, sosBtn);
+        sosRow.setWidthFull();
+        sosRow.setAlignItems(FlexComponent.Alignment.CENTER);
+        sosRow.getStyle()
+                .set("background", "#c00000")
+                .set("border-radius", "8px")
+                .set("padding", "12px 16px");
 
         Paragraph sosDesc = new Paragraph(getTranslation("control.sos.description"));
         sosDesc.getStyle().set("color", "var(--lumo-secondary-text-color)").set("font-size", "var(--lumo-font-size-s)");
 
-        HorizontalLayout btnRow = new HorizontalLayout(onBtn, offBtn, sosBtn);
-        btnRow.setSpacing(true);
-        btnRow.setPadding(false);
-        btnRow.setAlignItems(FlexComponent.Alignment.CENTER);
-
-        VerticalLayout panel = new VerticalLayout(
-                new H4(getTranslation("control.led")),
-                btnRow,
-                sosDesc);
+        VerticalLayout panel = new VerticalLayout(sosRow, sosDesc);
         panel.setPadding(true);
         return panel;
     }

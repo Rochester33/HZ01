@@ -13,9 +13,11 @@ import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.html.H2;
+import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
+import com.vaadin.flow.component.checkbox.Checkbox;
 import com.vaadin.flow.i18n.LocaleChangeEvent;
 import com.vaadin.flow.i18n.LocaleChangeObserver;
 import com.vaadin.flow.router.*;
@@ -91,7 +93,42 @@ public class DeviceDetailView extends VerticalLayout
 
         HorizontalLayout controls = new HorizontalLayout(buzzerOn, buzzerOff, ledBlink, ledOff);
 
-        add(header, cards, controls);
+        // SOS toggle row — full red with warning indicator
+        com.vaadin.flow.component.html.Span sosWarning = new com.vaadin.flow.component.html.Span(
+                "⚠ " + getTranslation("control.sos.label"));
+        sosWarning.getStyle()
+                .set("color", "white")
+                .set("font-weight", "bold")
+                .set("font-size", "1em")
+                .set("align-self", "center");
+
+        com.vaadin.flow.component.checkbox.Checkbox sosToggle = new com.vaadin.flow.component.checkbox.Checkbox(
+                getTranslation("control.sos.toggle"));
+        sosToggle.getStyle().set("color", "white").set("font-weight", "bold");
+        sosToggle.addValueChangeListener(e -> {
+            boolean active = e.getValue();
+            boolean ok;
+            if (active) {
+                ok = commandService.sendSos(deviceId);
+            } else {
+                // Turn off SOS: stop both LED and buzzer
+                ok = commandService.sendLed(deviceId, "off", 0)
+                        & commandService.sendBuzzer(deviceId, "off", 0);
+            }
+            Notification.show(ok ? getTranslation("control.send.success") : getTranslation("control.send.fail"),
+                    3000, Notification.Position.BOTTOM_END);
+            if (!ok) sosToggle.setValue(!active); // revert on failure
+        });
+
+        HorizontalLayout sosRow = new HorizontalLayout(sosWarning, sosToggle);
+        sosRow.setDefaultVerticalComponentAlignment(Alignment.CENTER);
+        sosRow.getStyle()
+                .set("background-color", "#c00000")
+                .set("padding", "10px 16px")
+                .set("border-radius", "6px")
+                .set("gap", "16px");
+
+        add(header, cards, controls, sosRow);
     }
 
     private void updateCardTitles() {

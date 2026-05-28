@@ -9,6 +9,7 @@ import com.vaadin.flow.component.formlayout.FormLayout;
 import com.vaadin.flow.component.html.H2;
 import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.component.notification.NotificationVariant;
+import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.select.Select;
@@ -29,7 +30,7 @@ public class ThresholdView extends VerticalLayout implements LocaleChangeObserve
     private final AlertApiClient alertApiClient;
 
     private static final List<String> SENSORS = List.of(
-            "temperature", "humidity", "oxygen", "co_level", "battery_level");
+            "temperature", "humidity", "oxygen", "co_level");
 
     private Select<String> sensorSelect;
     private NumberField warnMin;
@@ -38,6 +39,7 @@ public class ThresholdView extends VerticalLayout implements LocaleChangeObserve
     private NumberField critMax;
     private FormLayout form;
     private Button saveBtn;
+    private Span hintLabel;
 
     // Cache loaded thresholds
     private Map<String, AlertThresholdDto> byType = new HashMap<>();
@@ -87,12 +89,21 @@ public class ThresholdView extends VerticalLayout implements LocaleChangeObserve
         saveBtn.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
         saveBtn.setVisible(false);
 
+        // Validate: only non-negative integers allowed; empty = keep current; otherwise disable save
+        for (NumberField f : new NumberField[]{warnMin, warnMax, critMin, critMax}) {
+            f.addValueChangeListener(e -> validateFields());
+        }
+
         sensorSelect.addValueChangeListener(e -> onSensorSelected(e.getValue()));
 
         // Default: select first sensor
         sensorSelect.setValue(SENSORS.get(0));
 
-        add(sensorSelect, form, new HorizontalLayout(saveBtn));
+        // Hint text above save button
+        Span hint = new Span(getTranslation("threshold.hint"));
+        hint.getStyle().set("color", "white").set("font-size", "0.85em");
+
+        add(sensorSelect, form, hint, new HorizontalLayout(saveBtn));
     }
 
     private String sensorLabel(String sensor) {
@@ -120,6 +131,22 @@ public class ThresholdView extends VerticalLayout implements LocaleChangeObserve
             f.setVisible(true);
         }
         saveBtn.setVisible(true);
+    }
+
+    /**
+     * Validates all fields: each must be empty (keep current) or a non-negative integer.
+     * Disables the save button if any field contains an invalid value.
+     */
+    private void validateFields() {
+        boolean valid = true;
+        for (NumberField f : new NumberField[]{warnMin, warnMax, critMin, critMax}) {
+            Double val = f.getValue();
+            if (val != null && (val < 0 || val > 100 || val != Math.floor(val))) {
+                valid = false;
+                break;
+            }
+        }
+        saveBtn.setEnabled(valid);
     }
 
     private void save() {
