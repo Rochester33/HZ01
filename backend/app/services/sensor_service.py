@@ -15,6 +15,7 @@ async def ingest_reading(db: Session, payload: SensorReadingCreate) -> SensorRea
         humidity=payload.humidity,
         oxygen=payload.oxygen,
         co_level=payload.co_level,
+        methane_level=payload.methane_level,
         battery_level=payload.battery_level,
         recorded_at=recorded_at,
     )
@@ -40,6 +41,7 @@ async def ingest_reading(db: Session, payload: SensorReadingCreate) -> SensorRea
             "humidity": reading.humidity,
             "oxygen": reading.oxygen,
             "co_level": reading.co_level,
+            "methane_level": reading.methane_level,
             "battery_level": reading.battery_level,
             "recorded_at": str(reading.recorded_at),
         },

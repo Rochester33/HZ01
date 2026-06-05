@@ -12,6 +12,7 @@ class SensorReading(Base):
     humidity = Column(Float)       # %
     oxygen = Column(Float)         # %
     co_level = Column(Float)       # ppm
+    methane_level = Column(Float)  # ppm
     battery_level = Column(Float)  # %
     recorded_at = Column(DateTime, nullable=False, index=True)
     created_at = Column(DateTime, server_default=func.now())

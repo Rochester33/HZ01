@@ -9,6 +9,7 @@ class SensorReadingCreate(BaseModel):
     humidity: Optional[float] = None
     oxygen: Optional[float] = None
     co_level: Optional[float] = None
+    methane_level: Optional[float] = None
     battery_level: Optional[float] = None
     recorded_at: Optional[datetime] = None
 
@@ -20,6 +21,7 @@ class SensorReadingResponse(BaseModel):
     humidity: Optional[float]
     oxygen: Optional[float]
     co_level: Optional[float]
+    methane_level: Optional[float]
     battery_level: Optional[float]
     recorded_at: datetime
     created_at: datetime
