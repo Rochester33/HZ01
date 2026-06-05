@@ -130,7 +130,11 @@ def execute_command(cmd):
         elif action == "off":
             buzzer_manual_on = False
             buzzer.value(0)
+        elif action == "auto":
+            buzzer_manual_on = None
+            # Let the main loop handle it based on thresholds
         elif action == "blink":
+            buzzer_manual_on = None  # Return to auto after blink
             for _ in range(5):
                 buzzer.value(1)
                 time.sleep_ms(500)
@@ -144,7 +148,11 @@ def execute_command(cmd):
         elif action == "off":
             led_manual_on = False
             led.value(0)
+        elif action == "auto":
+            led_manual_on = None
+            # Let the main loop handle it
         elif action == "blink":
+            led_manual_on = None  # Return to auto after blink
             for _ in range(5):
                 led.value(1)
                 time.sleep_ms(500)
