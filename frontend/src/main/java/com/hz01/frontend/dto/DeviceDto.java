@@ -3,7 +3,7 @@ package com.hz01.frontend.dto;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
-import java.time.OffsetDateTime;
+import java.time.LocalDateTime;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 public record DeviceDto(
@@ -12,6 +12,6 @@ public record DeviceDto(
         String name,
         String location,
         String status,
-        @JsonProperty("last_seen") OffsetDateTime lastSeen,
-        @JsonProperty("created_at") OffsetDateTime createdAt
+        @JsonProperty("last_seen") LocalDateTime lastSeen,
+        @JsonProperty("created_at") LocalDateTime createdAt
 ) {}
