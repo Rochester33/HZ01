@@ -419,10 +419,8 @@ while True:
     # Upload and poll commands
     if not SERIAL_MODE:
         upload_ok = upload_reading(temp, humidity, mq4_value, mq7_value)
-        poll_tick += 1
-        if poll_tick >= 5:
-            recv_ok = poll_commands()
-            poll_tick = 0
+        # Poll commands EVERY cycle for immediate response
+        recv_ok = poll_commands()
     else:
         print(json.dumps({
             "device_id":   DEVICE_ID,
@@ -435,4 +433,4 @@ while True:
 
     oled(wifi_connected, False, upload_ok, recv_ok)
 
-    time.sleep(1)
+    time.sleep(0.5)  # Reduced from 1s to 0.5s for faster response
