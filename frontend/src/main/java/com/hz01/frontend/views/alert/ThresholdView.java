@@ -1,6 +1,7 @@
 package com.hz01.frontend.views.alert;
 
 import com.hz01.frontend.client.AlertApiClient;
+import com.hz01.frontend.client.DeviceApiClient;
 import com.hz01.frontend.dto.AlertThresholdDto;
 import com.hz01.frontend.views.MainLayout;
 import com.vaadin.flow.component.button.Button;
@@ -28,6 +29,7 @@ import java.util.Map;
 public class ThresholdView extends VerticalLayout implements LocaleChangeObserver {
 
     private final AlertApiClient alertApiClient;
+    private final DeviceApiClient deviceApiClient;
 
     private static final List<String> SENSORS = List.of(
             "temperature", "humidity", "oxygen", "co_level");
@@ -44,8 +46,9 @@ public class ThresholdView extends VerticalLayout implements LocaleChangeObserve
     // Cache loaded thresholds
     private Map<String, AlertThresholdDto> byType = new HashMap<>();
 
-    public ThresholdView(AlertApiClient alertApiClient) {
+    public ThresholdView(AlertApiClient alertApiClient, DeviceApiClient deviceApiClient) {
         this.alertApiClient = alertApiClient;
+        this.deviceApiClient = deviceApiClient;
         setSizeFull();
         setPadding(true);
         setAlignItems(Alignment.STRETCH);
@@ -152,6 +155,17 @@ public class ThresholdView extends VerticalLayout implements LocaleChangeObserve
     private void save() {
         String sensor = sensorSelect.getValue();
         if (sensor == null) return;
+
+        // Check if any devices exist
+        if (deviceApiClient.getAllDevices().isEmpty()) {
+            Notification n = Notification.show(
+                    getTranslation("threshold.no.devices"),
+                    4000,
+                    Notification.Position.BOTTOM_END);
+            n.addThemeVariants(NotificationVariant.LUMO_WARNING);
+            return;
+        }
+
         try {
             AlertThresholdDto dto = new AlertThresholdDto(
                     null, null, sensor,
@@ -163,13 +177,26 @@ public class ThresholdView extends VerticalLayout implements LocaleChangeObserve
             alertApiClient.upsertThreshold(dto);
             // Refresh cache
             byType.put(sensor, dto);
-            Notification n = Notification.show(getTranslation("threshold.save.success"), 3000,
-                    Notification.Position.BOTTOM_END);
+
+            // Create notification with explicit duration and auto-close
+            Notification n = new Notification();
             n.addThemeVariants(NotificationVariant.LUMO_SUCCESS);
+            n.setPosition(Notification.Position.BOTTOM_END);
+            n.setDuration(3000);
+
+            Span text = new Span(getTranslation("threshold.save.success"));
+            n.add(text);
+            n.open();
+
         } catch (Exception ex) {
-            Notification n = Notification.show(getTranslation("common.error.api"), 4000,
-                    Notification.Position.BOTTOM_END);
+            Notification n = new Notification();
             n.addThemeVariants(NotificationVariant.LUMO_ERROR);
+            n.setPosition(Notification.Position.BOTTOM_END);
+            n.setDuration(4000);
+
+            Span text = new Span(getTranslation("common.error.api"));
+            n.add(text);
+            n.open();
         }
     }
 

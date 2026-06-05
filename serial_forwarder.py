@@ -192,6 +192,7 @@ def run(port: str, baud: int, retry_interval: int):
 
 
 def main():
+    global DEVICE_ID
     parser = argparse.ArgumentParser(
         description="Serial ↔ hz01.online forwarder (sensor upload + command relay)",
         formatter_class=argparse.RawDescriptionHelpFormatter,
@@ -207,7 +208,7 @@ examples:
     parser.add_argument("--baud",   type=int, default=115200, help="Baud rate (default: 115200)")
     parser.add_argument("--list",   action="store_true", help="List available serial ports and exit")
     parser.add_argument("--retry",  type=int, default=5,   help="Reconnect interval in seconds (default: 5)")
-    parser.add_argument("--device", default=DEVICE_ID,    help=f"Device ID to poll commands for (default: {DEVICE_ID})")
+    parser.add_argument("--device", default=None, help=f"Device ID to poll commands for (default: {DEVICE_ID})")
     args = parser.parse_args()
 
     if args.list:
@@ -218,8 +219,8 @@ examples:
         parser.error("Please specify --port, or use --list to see available ports.")
 
     # Allow overriding DEVICE_ID from CLI
-    global DEVICE_ID
-    DEVICE_ID = args.device
+    if args.device:
+        DEVICE_ID = args.device
 
     run(args.port, args.baud, args.retry)
 

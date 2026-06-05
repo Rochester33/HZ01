@@ -3,7 +3,10 @@ from sqlalchemy.orm import Session
 from typing import List, Optional
 from app.database import get_db
 from app.models.alert import AlertThreshold, AlertEvent
+from app.models.device import Device
+from app.models.command import DeviceCommand
 from app.schemas.alert import ThresholdUpdate, ThresholdResponse, AlertEventResponse
+import json
 
 router = APIRouter(prefix="/alerts", tags=["alerts"])
 
@@ -13,8 +16,38 @@ def list_thresholds(db: Session = Depends(get_db)):
     return db.query(AlertThreshold).all()
 
 
+@router.get("/thresholds/device/{device_id}", response_model=List[ThresholdResponse])
+def get_device_thresholds(device_id: str, db: Session = Depends(get_db)):
+    """Get thresholds for a specific device (device-specific + global fallback)."""
+    thresholds = []
+    sensor_types = ["temperature", "humidity", "oxygen", "co_level", "methane_level", "battery_level"]
+
+    for sensor_type in sensor_types:
+        # Try device-specific first
+        threshold = (
+            db.query(AlertThreshold)
+            .filter(AlertThreshold.sensor_type == sensor_type)
+            .filter(AlertThreshold.device_id == device_id)
+            .first()
+        )
+        # Fallback to global
+        if not threshold:
+            threshold = (
+                db.query(AlertThreshold)
+                .filter(AlertThreshold.sensor_type == sensor_type)
+                .filter(AlertThreshold.device_id.is_(None))
+                .first()
+            )
+        if threshold:
+            thresholds.append(threshold)
+
+    return thresholds
+
+
 @router.put("/thresholds", response_model=ThresholdResponse)
 def upsert_threshold(payload: ThresholdUpdate, db: Session = Depends(get_db)):
+    from datetime import datetime
+
     row = (
         db.query(AlertThreshold)
         .filter(AlertThreshold.sensor_type == payload.sensor_type)
@@ -33,6 +66,47 @@ def upsert_threshold(payload: ThresholdUpdate, db: Session = Depends(get_db)):
         db.add(row)
     db.commit()
     db.refresh(row)
+
+    # Push threshold updates to all online devices
+    online_devices = db.query(Device).filter(Device.status == "online").all()
+    for device in online_devices:
+        # Fetch all thresholds for this device
+        sensor_types = ["temperature", "humidity", "oxygen", "co_level", "methane_level", "battery_level"]
+        device_thresholds = {}
+
+        for sensor_type in sensor_types:
+            threshold = (
+                db.query(AlertThreshold)
+                .filter(AlertThreshold.sensor_type == sensor_type)
+                .filter(AlertThreshold.device_id == device.device_id)
+                .first()
+            )
+            if not threshold:
+                threshold = (
+                    db.query(AlertThreshold)
+                    .filter(AlertThreshold.sensor_type == sensor_type)
+                    .filter(AlertThreshold.device_id.is_(None))
+                    .first()
+                )
+            if threshold:
+                device_thresholds[sensor_type] = {
+                    "warning_min": threshold.warning_min,
+                    "warning_max": threshold.warning_max,
+                    "critical_min": threshold.critical_min,
+                    "critical_max": threshold.critical_max,
+                }
+
+        # Create command to push thresholds
+        cmd = DeviceCommand(
+            device_id=device.device_id,
+            command_type="update_threshold",
+            action=json.dumps(device_thresholds),  # Store as JSON string
+            status="pending",
+            created_at=datetime.utcnow(),
+        )
+        db.add(cmd)
+
+    db.commit()
     return row
 
 
