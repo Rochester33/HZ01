@@ -55,8 +55,8 @@ thresholds = {
 }
 
 # ── State ─────────────────────────────────────────────────────────────────────
-buzzer_manual_on = False   # True = manually forced ON; None = auto mode
-led_manual_on    = False
+buzzer_manual_on = None   # None = auto mode; True = forced ON; False = forced OFF
+led_manual_on    = None
 
 
 # ── Sensor helpers ────────────────────────────────────────────────────────────
@@ -377,8 +377,13 @@ while True:
     )
 
     if temp is not None and humidity is not None:
-        if not buzzer_manual_on:
-            # Buzzer should sound if ANY threshold is exceeded
+        # Manual control has highest priority
+        if buzzer_manual_on is True:
+            buzzer.value(1)
+        elif buzzer_manual_on is False:
+            buzzer.value(0)
+        else:
+            # Auto mode: check thresholds
             temp_alert = (temp <= temp_warn_min or temp >= temp_warn_max)
             humid_alert = (humidity <= humid_warn_min or humidity >= humid_warn_max)
 
@@ -397,9 +402,9 @@ while True:
         else:
             status = "Online"
     else:
-        # If sensor reading failed, turn off buzzer
-        print("Sensor read failed, turning off buzzer")
-        if not buzzer_manual_on:
+        # If sensor reading failed, only turn off buzzer in auto mode
+        print("Sensor read failed")
+        if buzzer_manual_on is None:
             buzzer.value(0)
         status = "Online"
 

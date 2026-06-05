@@ -1,0 +1,37 @@
+/* Custom notification styling to remove extra padding */
+vaadin-notification-card {
+    padding: var(--lumo-space-m) !important;
+}
+
+vaadin-notification-card > * {
+    margin: 0 !important;
+    padding: 0 !important;
+}
+
+/* Ensure notifications auto-close */
+vaadin-notification-card[theme~="success"],
+vaadin-notification-card[theme~="error"] {
+    animation: slideIn 0.3s ease-out, slideOut 0.3s ease-in 1.7s forwards;
+}
+
+@keyframes slideIn {
+    from {
+        transform: translateX(100%);
+        opacity: 0;
+    }
+    to {
+        transform: translateX(0);
+        opacity: 1;
+    }
+}
+
+@keyframes slideOut {
+    from {
+        transform: translateX(0);
+        opacity: 1;
+    }
+    to {
+        transform: translateX(100%);
+        opacity: 0;
+    }
+}
