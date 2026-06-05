@@ -343,53 +343,66 @@ vaadin-tab-sheet::part(content) {
     padding: 1.2rem;
 }
 
-/* ── Notifications - FORCED FIX: No left spacing, auto-close ───────────────────────────────────────── */
+/* ── Notifications - PROPER FIX for Vaadin's container layout ───────────────────────────────────────── */
+
+/* The notification container takes full width by default - we need to make it auto-fit */
+vaadin-notification-container {
+    pointer-events: none !important;
+}
+
+/* Notification cards inside container should be inline-flex to size to content */
 vaadin-notification-card {
+    display: inline-flex !important;
+    pointer-events: auto !important;
     box-shadow: 0 10px 40px rgba(0,0,0,0.60), 0 2px 8px rgba(0,0,0,0.35) !important;
     border-radius: 12px !important;
     background: #1e293b !important;
     border: 1px solid rgba(59,130,246,0.22) !important;
     animation: slideUp 0.3s ease-out !important;
-    /* CRITICAL: Remove ALL padding and margins */
+    /* No outer padding/margin */
     padding: 0 !important;
     margin: 0 !important;
-    min-width: auto !important;
-    max-width: fit-content !important;
-    pointer-events: auto !important;
+    width: auto !important;
+    min-width: 0 !important;
+    max-width: none !important;
 }
 
-/* Force notification overlay container to be compact */
-vaadin-notification-container {
-    pointer-events: none !important;
-}
-
-vaadin-notification-container > * {
-    pointer-events: auto !important;
-}
-
-/* Add padding ONLY to the inner Span element */
+/* Inner span gets the padding */
 vaadin-notification-card span {
     margin: 0 !important;
     padding: 12px 20px !important;
     display: inline-block !important;
     white-space: nowrap !important;
     font-size: 0.95rem !important;
+    line-height: 1.4 !important;
 }
 
-/* Remove any Vaadin default spacing */
+/* Override Vaadin's overlay part */
 vaadin-notification-card::part(overlay) {
     padding: 0 !important;
     margin: 0 !important;
+    width: auto !important;
 }
 
-/* Success notification */
+/* Theme variants */
 vaadin-notification-card[theme~="success"] {
     border-color: rgba(16,185,129,0.4) !important;
+    background: #10b981 !important;
 }
 
-/* Error notification */
+vaadin-notification-card[theme~="success"] span {
+    color: white !important;
+    font-weight: 600 !important;
+}
+
 vaadin-notification-card[theme~="error"] {
     border-color: rgba(244,63,94,0.4) !important;
+    background: #f43f5e !important;
+}
+
+vaadin-notification-card[theme~="error"] span {
+    color: white !important;
+    font-weight: 600 !important;
 }
 
 /* ── Number / Integer field step buttons ─────────────────── */

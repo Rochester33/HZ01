@@ -210,63 +210,21 @@ public class ThresholdView extends VerticalLayout implements LocaleChangeObserve
             }
             deviceThresholds.put(sensor, dto);
 
-            // Create compact notification with proper styling
-            Span text = new Span(getTranslation("threshold.save.success"));
-            text.getStyle()
-                .set("display", "inline-block")
-                .set("padding", "10px 16px")
-                .set("margin", "0")
-                .set("white-space", "nowrap")
-                .set("font-size", "0.95rem");
-
-            Notification n = new Notification(text);
+            // Use simple Notification.show for proper auto-close behavior
+            Notification n = Notification.show(
+                getTranslation("threshold.save.success"),
+                2000,
+                Notification.Position.BOTTOM_END
+            );
             n.addThemeVariants(NotificationVariant.LUMO_SUCCESS);
-            n.setPosition(Notification.Position.BOTTOM_END);
-            n.setDuration(2000);
-
-            // Force compact layout
-            n.getElement().getStyle()
-                .set("padding", "0")
-                .set("margin", "0")
-                .set("max-width", "fit-content");
-
-            n.open();
-
-            // Force close after 2 seconds
-            text.getUI().ifPresent(ui -> {
-                ui.getElement().executeJs(
-                    "setTimeout(() => { const notification = document.querySelector('vaadin-notification-card'); if(notification) notification.close(); }, 2000);"
-                );
-            });
 
         } catch (Exception ex) {
-            Span text = new Span(getTranslation("common.error.api"));
-            text.getStyle()
-                .set("display", "inline-block")
-                .set("padding", "10px 16px")
-                .set("margin", "0")
-                .set("white-space", "nowrap")
-                .set("font-size", "0.95rem");
-
-            Notification n = new Notification(text);
+            Notification n = Notification.show(
+                getTranslation("common.error.api"),
+                2000,
+                Notification.Position.BOTTOM_END
+            );
             n.addThemeVariants(NotificationVariant.LUMO_ERROR);
-            n.setPosition(Notification.Position.BOTTOM_END);
-            n.setDuration(2000);
-
-            // Force compact layout
-            n.getElement().getStyle()
-                .set("padding", "0")
-                .set("margin", "0")
-                .set("max-width", "fit-content");
-
-            n.open();
-
-            // Force close after 2 seconds
-            text.getUI().ifPresent(ui -> {
-                ui.getElement().executeJs(
-                    "setTimeout(() => { const notification = document.querySelector('vaadin-notification-card'); if(notification) notification.close(); }, 2000);"
-                );
-            });
         }
     }
 
