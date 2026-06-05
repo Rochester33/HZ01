@@ -24,7 +24,7 @@ public class DeviceApiClient {
         try {
             log.info("Fetching devices from backend API...");
             List<DeviceDto> result = webClient.get()
-                    .uri("/api/v1/devices")
+                    .uri("/api/v1/devices/")  // 添加结尾斜杠
                     .retrieve()
                     .bodyToMono(new ParameterizedTypeReference<List<DeviceDto>>() {})
                     .block();
