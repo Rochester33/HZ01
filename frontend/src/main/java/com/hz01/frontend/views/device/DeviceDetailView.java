@@ -38,8 +38,8 @@ public class DeviceDetailView extends VerticalLayout
 
     private final SensorCard tempCard = new SensorCard("", "°C");
     private final SensorCard humCard = new SensorCard("", "%");
-    private final SensorCard o2Card = new SensorCard("", "%");
     private final SensorCard coCard = new SensorCard("", "ppm");
+    private final SensorCard methaneCard = new SensorCard("", "ppm");
     private final SensorCard batCard = new SensorCard("", "%");
 
     private Disposable subscription;
@@ -69,15 +69,15 @@ public class DeviceDetailView extends VerticalLayout
 
         updateCardTitles();
 
-        tempCard.setThresholds(-10.0, 35.0, -20.0, 45.0);
+        tempCard.setThresholds(-10.0, 40.0, -20.0, 45.0);
         humCard.setThresholds(20.0, 80.0, 10.0, 95.0);
-        o2Card.setThresholds(19.5, 23.0, 18.0, 25.0);
-        coCard.setThresholds(null, 25.0, null, 50.0);
+        coCard.setThresholds(null, 2000.0, null, 3000.0);
+        methaneCard.setThresholds(null, 2000.0, null, 3000.0);
         batCard.setThresholds(20.0, null, 10.0, null);
 
-        HorizontalLayout cards = new HorizontalLayout(tempCard, humCard, o2Card, coCard, batCard);
+        HorizontalLayout cards = new HorizontalLayout(tempCard, humCard, coCard, methaneCard, batCard);
         cards.setWidthFull();
-        cards.setFlexGrow(1, tempCard, humCard, o2Card, coCard, batCard);
+        cards.setFlexGrow(1, tempCard, humCard, coCard, methaneCard, batCard);
 
         Button buzzerOn = new Button(getTranslation("control.buzzer") + " ON",
                 e -> sendCmd("buzzer", "on"));
@@ -115,8 +115,19 @@ public class DeviceDetailView extends VerticalLayout
                 ok = commandService.sendLed(deviceId, "off", 0)
                         & commandService.sendBuzzer(deviceId, "off", 0);
             }
-            Notification.show(ok ? getTranslation("control.send.success") : getTranslation("control.send.fail"),
-                    3000, Notification.Position.BOTTOM_END);
+
+            Span text = new Span(ok ? getTranslation("control.send.success") : getTranslation("control.send.fail"));
+            text.getStyle()
+                .set("padding", "var(--lumo-space-m)")
+                .set("max-width", "300px")
+                .set("word-wrap", "break-word");
+
+            Notification n = new Notification(text);
+            n.addThemeVariants(ok ? NotificationVariant.LUMO_SUCCESS : NotificationVariant.LUMO_ERROR);
+            n.setPosition(Notification.Position.BOTTOM_END);
+            n.setDuration(3000);
+            n.open();
+
             if (!ok) sosToggle.setValue(!active); // revert on failure
         });
 
@@ -142,8 +153,8 @@ public class DeviceDetailView extends VerticalLayout
     private void applyReading(SensorReadingDto r) {
         tempCard.update(r.temperature());
         humCard.update(r.humidity());
-        o2Card.update(r.oxygen());
         coCard.update(r.coLevel());
+        methaneCard.update(r.methaneLevel());
         batCard.update(r.batteryLevel());
     }
 
@@ -151,8 +162,18 @@ public class DeviceDetailView extends VerticalLayout
         boolean ok = "buzzer".equals(type)
                 ? commandService.sendBuzzer(deviceId, action, 5)
                 : commandService.sendLed(deviceId, action, 5);
-        Notification.show(ok ? getTranslation("control.send.success") : getTranslation("control.send.fail"), 3000,
-                Notification.Position.BOTTOM_END);
+
+        Span text = new Span(ok ? getTranslation("control.send.success") : getTranslation("control.send.fail"));
+        text.getStyle()
+            .set("padding", "var(--lumo-space-m)")
+            .set("max-width", "300px")
+            .set("word-wrap", "break-word");
+
+        Notification n = new Notification(text);
+        n.addThemeVariants(ok ? NotificationVariant.LUMO_SUCCESS : NotificationVariant.LUMO_ERROR);
+        n.setPosition(Notification.Position.BOTTOM_END);
+        n.setDuration(3000);
+        n.open();
     }
 
     @Override
@@ -163,7 +184,7 @@ public class DeviceDetailView extends VerticalLayout
                 .subscribe(msg -> ui.access(() -> applyReading(new SensorReadingDto(
                         null, msg.deviceId(),
                         msg.temperature(), msg.humidity(), msg.oxygen(),
-                        msg.coLevel(), msg.batteryLevel(), null, null))));
+                        msg.coLevel(), msg.methaneLevel(), msg.batteryLevel(), null, null))));
     }
 
     @Override

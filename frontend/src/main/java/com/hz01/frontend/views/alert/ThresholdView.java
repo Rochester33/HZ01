@@ -32,8 +32,9 @@ public class ThresholdView extends VerticalLayout implements LocaleChangeObserve
     private final DeviceApiClient deviceApiClient;
 
     private static final List<String> SENSORS = List.of(
-            "temperature", "humidity", "oxygen", "co_level");
+            "temperature", "humidity", "co_level", "methane_level");
 
+    private Select<String> deviceSelect;
     private Select<String> sensorSelect;
     private NumberField warnMin;
     private NumberField warnMax;
@@ -43,8 +44,8 @@ public class ThresholdView extends VerticalLayout implements LocaleChangeObserve
     private Button saveBtn;
     private Span hintLabel;
 
-    // Cache loaded thresholds
-    private Map<String, AlertThresholdDto> byType = new HashMap<>();
+    // Cache loaded thresholds by device
+    private Map<String, Map<String, AlertThresholdDto>> thresholdsByDevice = new HashMap<>();
 
     public ThresholdView(AlertApiClient alertApiClient, DeviceApiClient deviceApiClient) {
         this.alertApiClient = alertApiClient;
@@ -60,10 +61,30 @@ public class ThresholdView extends VerticalLayout implements LocaleChangeObserve
 
         add(new H2(getTranslation("nav.thresholds")));
 
-        // Load current thresholds
-        List<AlertThresholdDto> thresholds = alertApiClient.getThresholds();
-        byType.clear();
-        thresholds.forEach(t -> byType.put(t.sensorType(), t));
+        // Device selector
+        List<String> deviceIds = deviceApiClient.getAllDevices().stream()
+                .map(d -> d.deviceId())
+                .toList();
+
+        deviceSelect = new Select<>();
+        deviceSelect.setLabel(getTranslation("control.select_device"));
+        deviceSelect.setItems(deviceIds);
+        deviceSelect.setItemLabelGenerator(id -> id);
+        deviceSelect.setWidth("300px");
+        deviceSelect.setEmptySelectionAllowed(false);
+
+        if (!deviceIds.isEmpty()) {
+            deviceSelect.setValue(deviceIds.get(0));
+        }
+
+        // Load thresholds for all devices
+        thresholdsByDevice.clear();
+        for (String deviceId : deviceIds) {
+            Map<String, AlertThresholdDto> deviceThresholds = new HashMap<>();
+            List<AlertThresholdDto> thresholds = alertApiClient.getDeviceThresholds(deviceId);
+            thresholds.forEach(t -> deviceThresholds.put(t.sensorType(), t));
+            thresholdsByDevice.put(deviceId, deviceThresholds);
+        }
 
         // Sensor dropdown
         sensorSelect = new Select<>();
@@ -97,16 +118,19 @@ public class ThresholdView extends VerticalLayout implements LocaleChangeObserve
             f.addValueChangeListener(e -> validateFields());
         }
 
+        deviceSelect.addValueChangeListener(e -> onDeviceChanged());
         sensorSelect.addValueChangeListener(e -> onSensorSelected(e.getValue()));
 
-        // Default: select first sensor
-        sensorSelect.setValue(SENSORS.get(0));
+        // Default: select first sensor if device is selected
+        if (!deviceIds.isEmpty()) {
+            sensorSelect.setValue(SENSORS.get(0));
+        }
 
         // Hint text above save button
         Span hint = new Span(getTranslation("threshold.hint"));
         hint.getStyle().set("color", "white").set("font-size", "0.85em");
 
-        add(sensorSelect, form, hint, new HorizontalLayout(saveBtn));
+        add(deviceSelect, sensorSelect, form, hint, new HorizontalLayout(saveBtn));
     }
 
     private String sensorLabel(String sensor) {
@@ -114,10 +138,21 @@ public class ThresholdView extends VerticalLayout implements LocaleChangeObserve
         return getTranslation("sensor." + key);
     }
 
+    private void onDeviceChanged() {
+        String sensor = sensorSelect.getValue();
+        if (sensor != null) {
+            onSensorSelected(sensor);
+        }
+    }
+
     private void onSensorSelected(String sensor) {
         if (sensor == null) return;
 
-        AlertThresholdDto t = byType.get(sensor);
+        String deviceId = deviceSelect.getValue();
+        if (deviceId == null) return;
+
+        Map<String, AlertThresholdDto> deviceThresholds = thresholdsByDevice.get(deviceId);
+        AlertThresholdDto t = deviceThresholds != null ? deviceThresholds.get(sensor) : null;
         String unit = t != null && t.unit() != null ? " (" + t.unit() + ")" : "";
 
         warnMin.setLabel(getTranslation("threshold.warning.level") + " Min" + unit);
@@ -154,29 +189,26 @@ public class ThresholdView extends VerticalLayout implements LocaleChangeObserve
 
     private void save() {
         String sensor = sensorSelect.getValue();
-        if (sensor == null) return;
-
-        // Check if any devices exist
-        if (deviceApiClient.getAllDevices().isEmpty()) {
-            Notification n = Notification.show(
-                    getTranslation("threshold.no.devices"),
-                    4000,
-                    Notification.Position.BOTTOM_END);
-            n.addThemeVariants(NotificationVariant.LUMO_WARNING);
-            return;
-        }
+        String deviceId = deviceSelect.getValue();
+        if (sensor == null || deviceId == null) return;
 
         try {
             AlertThresholdDto dto = new AlertThresholdDto(
-                    null, null, sensor,
+                    null, deviceId, sensor,
                     warnMin.getValue(),
                     warnMax.getValue(),
                     critMin.getValue(),
                     critMax.getValue(),
                     null, null);
             alertApiClient.upsertThreshold(dto);
-            // Refresh cache
-            byType.put(sensor, dto);
+
+            // Refresh cache for this device
+            Map<String, AlertThresholdDto> deviceThresholds = thresholdsByDevice.get(deviceId);
+            if (deviceThresholds == null) {
+                deviceThresholds = new HashMap<>();
+                thresholdsByDevice.put(deviceId, deviceThresholds);
+            }
+            deviceThresholds.put(sensor, dto);
 
             // Create compact notification with proper styling
             Span text = new Span(getTranslation("threshold.save.success"));

@@ -52,7 +52,10 @@ public class ControlView extends VerticalLayout implements LocaleChangeObserver 
 
         deviceSelect.setLabel(getTranslation("control.select_device"));
         deviceSelect.setItems(deviceIds);
-        if (!deviceIds.isEmpty()) deviceSelect.setValue(deviceIds.get(0));
+        deviceSelect.setEmptySelectionAllowed(false);
+        if (!deviceIds.isEmpty()) {
+            deviceSelect.setValue(deviceIds.get(0));
+        }
         deviceSelect.setWidthFull();
 
         TabSheet tabs = new TabSheet();
@@ -139,10 +142,17 @@ public class ControlView extends VerticalLayout implements LocaleChangeObserver 
     }
 
     private void showNotification(boolean ok) {
-        Notification n = Notification.show(
-                ok ? getTranslation("control.send.success") : getTranslation("control.send.fail"),
-                3000, Notification.Position.BOTTOM_END);
+        Span text = new Span(ok ? getTranslation("control.send.success") : getTranslation("control.send.fail"));
+        text.getStyle()
+            .set("padding", "var(--lumo-space-m)")
+            .set("max-width", "300px")
+            .set("word-wrap", "break-word");
+
+        Notification n = new Notification(text);
         n.addThemeVariants(ok ? NotificationVariant.LUMO_SUCCESS : NotificationVariant.LUMO_ERROR);
+        n.setPosition(Notification.Position.BOTTOM_END);
+        n.setDuration(3000);
+        n.open();
     }
 
     @Override

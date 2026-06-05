@@ -81,8 +81,19 @@ public class AlertView extends VerticalLayout implements LocaleChangeObserver {
             btn.addThemeVariants(ButtonVariant.LUMO_SMALL, ButtonVariant.LUMO_PRIMARY);
             btn.addClickListener(ev -> {
                 alertApiClient.acknowledgeEvent(e.id());
-                Notification.show(getTranslation("alert.acknowledge.success"), 2000,
-                        Notification.Position.BOTTOM_END);
+
+                Span text = new Span(getTranslation("alert.acknowledge.success"));
+                text.getStyle()
+                    .set("padding", "var(--lumo-space-m)")
+                    .set("max-width", "300px")
+                    .set("word-wrap", "break-word");
+
+                Notification n = new Notification(text);
+                n.addThemeVariants(NotificationVariant.LUMO_SUCCESS);
+                n.setPosition(Notification.Position.BOTTOM_END);
+                n.setDuration(2000);
+                n.open();
+
                 loadData();
             });
             return btn;
@@ -102,15 +113,23 @@ public class AlertView extends VerticalLayout implements LocaleChangeObserver {
         UI ui = event.getUI();
         subscription = eventBus.subscribeAlerts().subscribe(msg -> {
             ui.access(() -> {
-                Notification n = new Notification(
-                        "⚠ " + msg.deviceId() + " — " + msg.sensorType() + ": " + msg.value(),
-                        5000, Notification.Position.TOP_END);
+                String message = "⚠ " + msg.deviceId() + " — " + msg.sensorType() + ": " + msg.value();
+                Span text = new Span(message);
+                text.getStyle()
+                    .set("padding", "var(--lumo-space-m)")
+                    .set("max-width", "400px")
+                    .set("word-wrap", "break-word");
+
+                Notification n = new Notification(text);
                 if ("critical".equals(msg.level())) {
                     n.addThemeVariants(NotificationVariant.LUMO_ERROR);
                 } else {
                     n.addThemeVariants(NotificationVariant.LUMO_WARNING);
                 }
+                n.setPosition(Notification.Position.TOP_END);
+                n.setDuration(5000);
                 n.open();
+
                 loadData();
             });
         });

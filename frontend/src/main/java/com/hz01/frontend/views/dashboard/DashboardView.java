@@ -56,8 +56,8 @@ public class DashboardView extends VerticalLayout implements LocaleChangeObserve
         grid.addColumn(SensorReadingDto::deviceId).setHeader(getTranslation("sensor.device")).setAutoWidth(true);
         grid.addColumn(r -> formatVal(r.temperature(), "°C")).setHeader(getTranslation("sensor.temperature")).setAutoWidth(true);
         grid.addColumn(r -> formatVal(r.humidity(), "%")).setHeader(getTranslation("sensor.humidity")).setAutoWidth(true);
-        grid.addColumn(r -> formatVal(r.oxygen(), "%")).setHeader(getTranslation("sensor.oxygen")).setAutoWidth(true);
         grid.addColumn(r -> formatVal(r.coLevel(), " ppm")).setHeader(getTranslation("sensor.co")).setAutoWidth(true);
+        grid.addColumn(r -> formatVal(r.methaneLevel(), " ppm")).setHeader(getTranslation("sensor.methane")).setAutoWidth(true);
         grid.addColumn(r -> formatVal(r.batteryLevel(), "%")).setHeader(getTranslation("sensor.battery")).setAutoWidth(true);
         grid.addComponentColumn(r -> statusBadge(r)).setHeader(getTranslation("sensor.status")).setAutoWidth(true);
 
@@ -76,12 +76,14 @@ public class DashboardView extends VerticalLayout implements LocaleChangeObserve
     }
 
     private String computeLevel(SensorReadingDto r) {
-        if (r.oxygen() != null && r.oxygen() < 18) return "critical";
-        if (r.coLevel() != null && r.coLevel() > 50) return "critical";
+        if (r.coLevel() != null && r.coLevel() > 3000) return "critical";
+        if (r.methaneLevel() != null && r.methaneLevel() > 3000) return "critical";
         if (r.temperature() != null && r.temperature() > 45) return "critical";
-        if (r.oxygen() != null && r.oxygen() < 19.5) return "warning";
-        if (r.coLevel() != null && r.coLevel() > 25) return "warning";
-        if (r.temperature() != null && r.temperature() > 35) return "warning";
+        if (r.humidity() != null && r.humidity() > 95) return "critical";
+        if (r.coLevel() != null && r.coLevel() > 2000) return "warning";
+        if (r.methaneLevel() != null && r.methaneLevel() > 2000) return "warning";
+        if (r.temperature() != null && r.temperature() > 40) return "warning";
+        if (r.humidity() != null && r.humidity() > 80) return "warning";
         if (r.batteryLevel() != null && r.batteryLevel() < 10) return "critical";
         if (r.batteryLevel() != null && r.batteryLevel() < 20) return "warning";
         return "normal";
@@ -102,7 +104,7 @@ public class DashboardView extends VerticalLayout implements LocaleChangeObserve
                 readingsMap.put(msg.deviceId(), new SensorReadingDto(
                         null, msg.deviceId(),
                         msg.temperature(), msg.humidity(), msg.oxygen(),
-                        msg.coLevel(), msg.batteryLevel(), null, null));
+                        msg.coLevel(), msg.methaneLevel(), msg.batteryLevel(), null, null));
                 grid.setItems(new ArrayList<>(readingsMap.values()));
             });
         });

@@ -31,6 +31,19 @@ public class AlertApiClient {
         }
     }
 
+    public List<AlertThresholdDto> getDeviceThresholds(String deviceId) {
+        try {
+            List<AlertThresholdDto> result = webClient.get()
+                    .uri("/api/v1/alerts/thresholds/device/" + deviceId)
+                    .retrieve()
+                    .bodyToMono(new ParameterizedTypeReference<List<AlertThresholdDto>>() {})
+                    .block();
+            return result != null ? result : Collections.emptyList();
+        } catch (Exception e) {
+            return Collections.emptyList();
+        }
+    }
+
     public void upsertThreshold(AlertThresholdDto dto) {
         try {
             webClient.put()

@@ -13,6 +13,7 @@ public record SensorReadingDto(
         Double humidity,
         Double oxygen,
         @JsonProperty("co_level") Double coLevel,
+        @JsonProperty("methane_level") Double methaneLevel,
         @JsonProperty("battery_level") Double batteryLevel,
         @JsonProperty("recorded_at") OffsetDateTime recordedAt,
         @JsonProperty("created_at") OffsetDateTime createdAt
