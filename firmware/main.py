@@ -358,10 +358,16 @@ while True:
     print("Temp: {}, Humidity: {}, MQ4: {}, MQ7: {}".format(temp, humidity, mq4_value, mq7_value))
 
     # Check thresholds using dynamic values
-    temp_warn = thresholds.get("temperature", {}).get("warning_max", 40)
-    temp_crit = thresholds.get("temperature", {}).get("critical_max", 45)
-    humid_warn = thresholds.get("humidity", {}).get("warning_max", 80)
-    humid_crit = thresholds.get("humidity", {}).get("critical_max", 95)
+    temp_warn_min = thresholds.get("temperature", {}).get("warning_min", -10)
+    temp_warn_max = thresholds.get("temperature", {}).get("warning_max", 40)
+    temp_crit_min = thresholds.get("temperature", {}).get("critical_min", -20)
+    temp_crit_max = thresholds.get("temperature", {}).get("critical_max", 45)
+
+    humid_warn_min = thresholds.get("humidity", {}).get("warning_min", 20)
+    humid_warn_max = thresholds.get("humidity", {}).get("warning_max", 80)
+    humid_crit_min = thresholds.get("humidity", {}).get("critical_min", 10)
+    humid_crit_max = thresholds.get("humidity", {}).get("critical_max", 95)
+
     co_warn = thresholds.get("co_level", {}).get("warning_max", 2000)
     methane_warn = thresholds.get("methane_level", {}).get("warning_max", 2000)
 
@@ -372,16 +378,21 @@ while True:
 
     if temp is not None and humidity is not None:
         if not buzzer_manual_on:
-            auto_on = (
-                (temp >= temp_warn) or
-                (humidity >= humid_warn) or
-                gas_alert
-            )
-            print("Auto buzzer: temp_check={}, humid_check={}, gas_check={}".format(
-                temp >= temp_warn, humidity >= humid_warn, gas_alert))
+            # Buzzer should sound if ANY threshold is exceeded
+            temp_alert = (temp <= temp_warn_min or temp >= temp_warn_max)
+            humid_alert = (humidity <= humid_warn_min or humidity >= humid_warn_max)
+
+            auto_on = temp_alert or humid_alert or gas_alert
+
+            print("Auto buzzer: temp={} (alert={}), humidity={} (alert={}), gas_alert={}".format(
+                temp, temp_alert, humidity, humid_alert, gas_alert))
             buzzer.value(1 if auto_on else 0)
 
-        if humidity >= humid_crit or gas_alert:
+        # Critical status check
+        temp_critical = (temp <= temp_crit_min or temp >= temp_crit_max)
+        humid_critical = (humidity <= humid_crit_min or humidity >= humid_crit_max)
+
+        if temp_critical or humid_critical or gas_alert:
             status = "Warning"
         else:
             status = "Online"
