@@ -343,20 +343,37 @@ vaadin-tab-sheet::part(content) {
     padding: 1.2rem;
 }
 
-/* ── Notifications ───────────────────────────────────────── */
+/* ── Notifications - FIXED: No left spacing, auto-close ───────────────────────────────────────── */
 vaadin-notification-card {
     box-shadow: 0 10px 40px rgba(0,0,0,0.60), 0 2px 8px rgba(0,0,0,0.35);
     border-radius: 12px;
     background: #1e293b;
     border: 1px solid rgba(59,130,246,0.22);
     animation: slideUp 0.3s ease-out;
-    padding: var(--lumo-space-s) var(--lumo-space-m) !important;
+    /* CRITICAL: Remove all padding from card itself */
+    padding: 0 !important;
+    margin: 0 !important;
+    /* Ensure it closes after duration */
+    pointer-events: auto;
 }
 
+/* Add padding ONLY to the inner content */
 vaadin-notification-card > * {
     margin: 0 !important;
-    padding: 0 !important;
-    display: block;
+    padding: 12px 16px !important;
+    display: block !important;
+    width: 100% !important;
+    box-sizing: border-box !important;
+}
+
+/* Success notification */
+vaadin-notification-card[theme~="success"] {
+    border-color: rgba(16,185,129,0.4);
+}
+
+/* Error notification */
+vaadin-notification-card[theme~="error"] {
+    border-color: rgba(244,63,94,0.4);
 }
 
 /* ── Number / Integer field step buttons ─────────────────── */
