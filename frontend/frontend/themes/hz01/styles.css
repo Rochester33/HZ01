@@ -350,6 +350,13 @@ vaadin-notification-card {
     background: #1e293b;
     border: 1px solid rgba(59,130,246,0.22);
     animation: slideUp 0.3s ease-out;
+    padding: var(--lumo-space-s) var(--lumo-space-m) !important;
+}
+
+vaadin-notification-card > * {
+    margin: 0 !important;
+    padding: 0 !important;
+    display: block;
 }
 
 /* ── Number / Integer field step buttons ─────────────────── */
