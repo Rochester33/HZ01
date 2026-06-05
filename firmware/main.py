@@ -365,16 +365,16 @@ while True:
     # Debug output
     print("Temp: {}, Humidity: {}, MQ4: {}, MQ7: {}".format(temp, humidity, mq4_value, mq7_value))
 
-    # Check thresholds using dynamic values
-    temp_warn_min = thresholds.get("temperature", {}).get("warning_min", -10)
-    temp_warn_max = thresholds.get("temperature", {}).get("warning_max", 40)
-    temp_crit_min = thresholds.get("temperature", {}).get("critical_min", -20)
-    temp_crit_max = thresholds.get("temperature", {}).get("critical_max", 45)
+    # Check thresholds using dynamic values (None if not set)
+    temp_warn_min = thresholds.get("temperature", {}).get("warning_min")
+    temp_warn_max = thresholds.get("temperature", {}).get("warning_max")
+    temp_crit_min = thresholds.get("temperature", {}).get("critical_min")
+    temp_crit_max = thresholds.get("temperature", {}).get("critical_max")
 
-    humid_warn_min = thresholds.get("humidity", {}).get("warning_min", 20)
-    humid_warn_max = thresholds.get("humidity", {}).get("warning_max", 80)
-    humid_crit_min = thresholds.get("humidity", {}).get("critical_min", 10)
-    humid_crit_max = thresholds.get("humidity", {}).get("critical_max", 95)
+    humid_warn_min = thresholds.get("humidity", {}).get("warning_min")
+    humid_warn_max = thresholds.get("humidity", {}).get("warning_max")
+    humid_crit_min = thresholds.get("humidity", {}).get("critical_min")
+    humid_crit_max = thresholds.get("humidity", {}).get("critical_max")
 
     co_warn = thresholds.get("co_level", {}).get("warning_max", 2000)
     methane_warn = thresholds.get("methane_level", {}).get("warning_max", 2000)
@@ -391,9 +391,18 @@ while True:
         elif buzzer_manual_on is False:
             buzzer.value(0)
         else:
-            # Auto mode: check thresholds
-            temp_alert = (temp <= temp_warn_min or temp >= temp_warn_max)
-            humid_alert = (humidity <= humid_warn_min or humidity >= humid_warn_max)
+            # Auto mode: check thresholds (only if they exist)
+            temp_alert = False
+            if temp_warn_min is not None and temp <= temp_warn_min:
+                temp_alert = True
+            if temp_warn_max is not None and temp >= temp_warn_max:
+                temp_alert = True
+
+            humid_alert = False
+            if humid_warn_min is not None and humidity <= humid_warn_min:
+                humid_alert = True
+            if humid_warn_max is not None and humidity >= humid_warn_max:
+                humid_alert = True
 
             auto_on = temp_alert or humid_alert or gas_alert
 
@@ -401,9 +410,18 @@ while True:
                 temp, temp_alert, humidity, humid_alert, gas_alert))
             buzzer.value(1 if auto_on else 0)
 
-        # Critical status check
-        temp_critical = (temp <= temp_crit_min or temp >= temp_crit_max)
-        humid_critical = (humidity <= humid_crit_min or humidity >= humid_crit_max)
+        # Critical status check (only if thresholds exist)
+        temp_critical = False
+        if temp_crit_min is not None and temp <= temp_crit_min:
+            temp_critical = True
+        if temp_crit_max is not None and temp >= temp_crit_max:
+            temp_critical = True
+
+        humid_critical = False
+        if humid_crit_min is not None and humidity <= humid_crit_min:
+            humid_critical = True
+        if humid_crit_max is not None and humidity >= humid_crit_max:
+            humid_critical = True
 
         if temp_critical or humid_critical or gas_alert:
             status = "Warning"
