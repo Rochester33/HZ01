@@ -230,6 +230,8 @@ def upload_reading(temp, humidity, mq4_value, mq7_value):
         "methane_level": mq4_value if isinstance(mq4_value, int) else None,
     }
 
+    print("Uploading data: {}".format(payload))
+
     # Try with extended timeout and handle common responses
     for attempt in range(2):
         try:
@@ -242,7 +244,9 @@ def upload_reading(temp, humidity, mq4_value, mq7_value):
             )
             # Accept both 200 and 201 as success
             ok = resp.status_code in (200, 201)
-            if not ok:
+            if ok:
+                print("Upload successful: status {}".format(resp.status_code))
+            else:
                 print("Upload status: {} (expected 200/201)".format(resp.status_code))
             resp.close()
             return ok
