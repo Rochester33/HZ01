@@ -350,6 +350,9 @@ while True:
     mq4_value      = read_mq4()
     mq7_value      = read_mq7()
 
+    # Debug output
+    print("Temp: {}, Humidity: {}, MQ4: {}, MQ7: {}".format(temp, humidity, mq4_value, mq7_value))
+
     # Check thresholds using dynamic values
     temp_warn = thresholds.get("temperature", {}).get("warning_max", 40)
     temp_crit = thresholds.get("temperature", {}).get("critical_max", 45)
@@ -363,13 +366,15 @@ while True:
         (isinstance(mq7_value, int) and mq7_value >= co_warn)
     )
 
-    if temp is not None:
+    if temp is not None and humidity is not None:
         if not buzzer_manual_on:
             auto_on = (
-                temp >= temp_warn or
-                humidity >= humid_warn or
+                (temp >= temp_warn) or
+                (humidity >= humid_warn) or
                 gas_alert
             )
+            print("Auto buzzer: temp_check={}, humid_check={}, gas_check={}".format(
+                temp >= temp_warn, humidity >= humid_warn, gas_alert))
             buzzer.value(1 if auto_on else 0)
 
         if humidity >= humid_crit or gas_alert:
@@ -377,6 +382,10 @@ while True:
         else:
             status = "Online"
     else:
+        # If sensor reading failed, turn off buzzer
+        print("Sensor read failed, turning off buzzer")
+        if not buzzer_manual_on:
+            buzzer.value(0)
         status = "Online"
 
     # Upload and poll commands
