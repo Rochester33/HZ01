@@ -68,7 +68,7 @@ public class ControlView extends VerticalLayout implements LocaleChangeObserver 
     }
 
     /**
-     * Build a simple ON/OFF toggle panel for a given device type (buzzer or led).
+     * Build a simple ON/OFF/AUTO toggle panel for a given device type (buzzer or led).
      */
     private VerticalLayout buildTogglePanel(String type) {
         Button onBtn = new Button(getTranslation("control.action.on"));
@@ -79,7 +79,11 @@ public class ControlView extends VerticalLayout implements LocaleChangeObserver 
         offBtn.addThemeVariants(ButtonVariant.LUMO_ERROR);
         offBtn.addClickListener(e -> sendCommand(type, "off", 0));
 
-        HorizontalLayout btnRow = new HorizontalLayout(onBtn, offBtn);
+        Button autoBtn = new Button(getTranslation("control.action.blink"));
+        autoBtn.addThemeVariants(ButtonVariant.LUMO_TERTIARY);
+        autoBtn.addClickListener(e -> sendCommand(type, "blink", 0));
+
+        HorizontalLayout btnRow = new HorizontalLayout(onBtn, offBtn, autoBtn);
         btnRow.setSpacing(true);
         btnRow.setPadding(false);
         btnRow.setAlignItems(FlexComponent.Alignment.CENTER);
