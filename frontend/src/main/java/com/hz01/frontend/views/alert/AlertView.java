@@ -114,12 +114,14 @@ public class AlertView extends VerticalLayout implements LocaleChangeObserver {
         UI ui = event.getUI();
         subscription = eventBus.subscribeAlerts().subscribe(msg -> {
             ui.access(() -> {
-                String message = "⚠ " + msg.deviceId() + " — " + msg.sensorType() + ": " + msg.value();
+                String message = msg.deviceId() + " — " + msg.sensorType() + ": " + msg.value();
                 Span text = new Span(message);
                 text.getStyle()
+                    .set("display", "inline-block")
                     .set("padding", "var(--lumo-space-m)")
                     .set("max-width", "400px")
-                    .set("word-wrap", "break-word");
+                    .set("word-wrap", "break-word")
+                    .set("white-space", "normal");
 
                 Notification n = new Notification(text);
                 if ("critical".equals(msg.level())) {
