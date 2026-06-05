@@ -119,15 +119,29 @@ public class DeviceDetailView extends VerticalLayout
 
             Span text = new Span(ok ? getTranslation("control.send.success") : getTranslation("control.send.fail"));
             text.getStyle()
-                .set("display", "block")
-                .set("padding", "0")
-                .set("margin", "0");
+                .set("display", "inline-block")
+                .set("padding", "10px 16px")
+                .set("margin", "0")
+                .set("white-space", "nowrap")
+                .set("font-size", "0.95rem");
 
             Notification n = new Notification(text);
             n.addThemeVariants(ok ? NotificationVariant.LUMO_SUCCESS : NotificationVariant.LUMO_ERROR);
             n.setPosition(Notification.Position.BOTTOM_END);
             n.setDuration(2000);
+
+            n.getElement().getStyle()
+                .set("padding", "0")
+                .set("margin", "0")
+                .set("max-width", "fit-content");
+
             n.open();
+
+            text.getUI().ifPresent(ui -> {
+                ui.getElement().executeJs(
+                    "setTimeout(() => { const notification = document.querySelector('vaadin-notification-card'); if(notification) notification.close(); }, 2000);"
+                );
+            });
 
             if (!ok) sosToggle.setValue(!active); // revert on failure
         });
@@ -166,15 +180,29 @@ public class DeviceDetailView extends VerticalLayout
 
         Span text = new Span(ok ? getTranslation("control.send.success") : getTranslation("control.send.fail"));
         text.getStyle()
-            .set("display", "block")
-            .set("padding", "0")
-            .set("margin", "0");
+            .set("display", "inline-block")
+            .set("padding", "10px 16px")
+            .set("margin", "0")
+            .set("white-space", "nowrap")
+            .set("font-size", "0.95rem");
 
         Notification n = new Notification(text);
         n.addThemeVariants(ok ? NotificationVariant.LUMO_SUCCESS : NotificationVariant.LUMO_ERROR);
         n.setPosition(Notification.Position.BOTTOM_END);
         n.setDuration(2000);
+
+        n.getElement().getStyle()
+            .set("padding", "0")
+            .set("margin", "0")
+            .set("max-width", "fit-content");
+
         n.open();
+
+        text.getUI().ifPresent(ui -> {
+            ui.getElement().executeJs(
+                "setTimeout(() => { const notification = document.querySelector('vaadin-notification-card'); if(notification) notification.close(); }, 2000);"
+            );
+        });
     }
 
     @Override
