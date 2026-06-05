@@ -119,14 +119,14 @@ public class DeviceDetailView extends VerticalLayout
 
             Span text = new Span(ok ? getTranslation("control.send.success") : getTranslation("control.send.fail"));
             text.getStyle()
-                .set("padding", "var(--lumo-space-m)")
-                .set("max-width", "300px")
-                .set("word-wrap", "break-word");
+                .set("display", "block")
+                .set("padding", "0")
+                .set("margin", "0");
 
             Notification n = new Notification(text);
             n.addThemeVariants(ok ? NotificationVariant.LUMO_SUCCESS : NotificationVariant.LUMO_ERROR);
             n.setPosition(Notification.Position.BOTTOM_END);
-            n.setDuration(3000);
+            n.setDuration(2000);
             n.open();
 
             if (!ok) sosToggle.setValue(!active); // revert on failure
@@ -166,14 +166,14 @@ public class DeviceDetailView extends VerticalLayout
 
         Span text = new Span(ok ? getTranslation("control.send.success") : getTranslation("control.send.fail"));
         text.getStyle()
-            .set("padding", "var(--lumo-space-m)")
-            .set("max-width", "300px")
-            .set("word-wrap", "break-word");
+            .set("display", "block")
+            .set("padding", "0")
+            .set("margin", "0");
 
         Notification n = new Notification(text);
         n.addThemeVariants(ok ? NotificationVariant.LUMO_SUCCESS : NotificationVariant.LUMO_ERROR);
         n.setPosition(Notification.Position.BOTTOM_END);
-        n.setDuration(3000);
+        n.setDuration(2000);
         n.open();
     }
 

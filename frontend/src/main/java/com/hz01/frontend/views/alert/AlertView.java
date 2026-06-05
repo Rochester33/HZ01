@@ -85,9 +85,9 @@ public class AlertView extends VerticalLayout implements LocaleChangeObserver {
 
                 Span text = new Span(getTranslation("alert.acknowledge.success"));
                 text.getStyle()
-                    .set("padding", "var(--lumo-space-m)")
-                    .set("max-width", "300px")
-                    .set("word-wrap", "break-word");
+                    .set("display", "block")
+                    .set("padding", "0")
+                    .set("margin", "0");
 
                 Notification n = new Notification(text);
                 n.addThemeVariants(NotificationVariant.LUMO_SUCCESS);

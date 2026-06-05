@@ -213,27 +213,27 @@ public class ThresholdView extends VerticalLayout implements LocaleChangeObserve
             // Create compact notification with proper styling
             Span text = new Span(getTranslation("threshold.save.success"));
             text.getStyle()
-                .set("padding", "var(--lumo-space-m)")
-                .set("max-width", "300px")
-                .set("word-wrap", "break-word");
+                .set("display", "block")
+                .set("padding", "0")
+                .set("margin", "0");
 
             Notification n = new Notification(text);
             n.addThemeVariants(NotificationVariant.LUMO_SUCCESS);
             n.setPosition(Notification.Position.BOTTOM_END);
-            n.setDuration(3000);
+            n.setDuration(2000);
             n.open();
 
         } catch (Exception ex) {
             Span text = new Span(getTranslation("common.error.api"));
             text.getStyle()
-                .set("padding", "var(--lumo-space-m)")
-                .set("max-width", "300px")
-                .set("word-wrap", "break-word");
+                .set("display", "block")
+                .set("padding", "0")
+                .set("margin", "0");
 
             Notification n = new Notification(text);
             n.addThemeVariants(NotificationVariant.LUMO_ERROR);
             n.setPosition(Notification.Position.BOTTOM_END);
-            n.setDuration(4000);
+            n.setDuration(2000);
             n.open();
         }
     }
