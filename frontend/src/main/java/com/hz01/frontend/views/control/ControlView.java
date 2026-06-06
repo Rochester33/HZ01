@@ -4,6 +4,7 @@ import com.hz01.frontend.client.DeviceApiClient;
 import com.hz01.frontend.dto.DeviceDto;
 import com.hz01.frontend.service.CommandService;
 import com.hz01.frontend.views.MainLayout;
+import com.hz01.frontend.views.components.CustomNotification;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.checkbox.Checkbox;
@@ -11,8 +12,6 @@ import com.vaadin.flow.component.html.H2;
 import com.vaadin.flow.component.html.H4;
 import com.vaadin.flow.component.html.Paragraph;
 import com.vaadin.flow.component.html.Span;
-import com.vaadin.flow.component.notification.Notification;
-import com.vaadin.flow.component.notification.NotificationVariant;
 import com.vaadin.flow.component.orderedlayout.FlexComponent;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
@@ -148,8 +147,11 @@ public class ControlView extends VerticalLayout implements LocaleChangeObserver 
     private void showNotification(boolean ok) {
         String message = ok ? getTranslation("control.send.success") : getTranslation("control.send.fail");
 
-        Notification n = Notification.show(message, 3000, Notification.Position.BOTTOM_START);
-        n.addThemeVariants(ok ? NotificationVariant.LUMO_SUCCESS : NotificationVariant.LUMO_ERROR);
+        if (ok) {
+            CustomNotification.showSuccess(message);
+        } else {
+            CustomNotification.showError(message);
+        }
     }
 
     @Override

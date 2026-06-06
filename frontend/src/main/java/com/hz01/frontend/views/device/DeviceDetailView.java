@@ -5,6 +5,7 @@ import com.hz01.frontend.dto.SensorReadingDto;
 import com.hz01.frontend.service.CommandService;
 import com.hz01.frontend.service.RealtimeEventBus;
 import com.hz01.frontend.views.MainLayout;
+import com.hz01.frontend.views.components.CustomNotification;
 import com.hz01.frontend.views.components.SensorCard;
 import com.hz01.frontend.views.components.StatusBadge;
 import com.vaadin.flow.component.AttachEvent;
@@ -14,8 +15,6 @@ import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.html.H2;
 import com.vaadin.flow.component.html.Span;
-import com.vaadin.flow.component.notification.Notification;
-import com.vaadin.flow.component.notification.NotificationVariant;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.checkbox.Checkbox;
@@ -118,8 +117,11 @@ public class DeviceDetailView extends VerticalLayout
             }
 
             String message = ok ? getTranslation("control.send.success") : getTranslation("control.send.fail");
-            Notification n = Notification.show(message, 3000, Notification.Position.BOTTOM_START);
-            n.addThemeVariants(ok ? NotificationVariant.LUMO_SUCCESS : NotificationVariant.LUMO_ERROR);
+            if (ok) {
+                CustomNotification.showSuccess(message);
+            } else {
+                CustomNotification.showError(message);
+            }
 
             if (!ok) sosToggle.setValue(!active); // revert on failure
         });
@@ -157,8 +159,11 @@ public class DeviceDetailView extends VerticalLayout
                 : commandService.sendLed(deviceId, action, 5);
 
         String message = ok ? getTranslation("control.send.success") : getTranslation("control.send.fail");
-        Notification n = Notification.show(message, 3000, Notification.Position.BOTTOM_START);
-        n.addThemeVariants(ok ? NotificationVariant.LUMO_SUCCESS : NotificationVariant.LUMO_ERROR);
+        if (ok) {
+            CustomNotification.showSuccess(message);
+        } else {
+            CustomNotification.showError(message);
+        }
     }
 
     @Override

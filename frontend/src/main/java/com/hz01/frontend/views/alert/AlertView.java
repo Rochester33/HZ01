@@ -4,6 +4,7 @@ import com.hz01.frontend.client.AlertApiClient;
 import com.hz01.frontend.dto.AlertEventDto;
 import com.hz01.frontend.service.RealtimeEventBus;
 import com.hz01.frontend.views.MainLayout;
+import com.hz01.frontend.views.components.CustomNotification;
 import com.hz01.frontend.views.components.StatusBadge;
 import com.vaadin.flow.component.AttachEvent;
 import com.vaadin.flow.component.DetachEvent;
@@ -83,12 +84,7 @@ public class AlertView extends VerticalLayout implements LocaleChangeObserver {
             btn.addClickListener(ev -> {
                 alertApiClient.acknowledgeEvent(e.id());
 
-                Notification n = Notification.show(
-                    getTranslation("alert.acknowledge.success"),
-                    3000,
-                    Notification.Position.BOTTOM_START
-                );
-                n.addThemeVariants(NotificationVariant.LUMO_SUCCESS);
+                CustomNotification.showSuccess(getTranslation("alert.acknowledge.success"));
 
                 loadData();
             });

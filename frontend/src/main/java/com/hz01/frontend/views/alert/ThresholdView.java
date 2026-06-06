@@ -4,12 +4,11 @@ import com.hz01.frontend.client.AlertApiClient;
 import com.hz01.frontend.client.DeviceApiClient;
 import com.hz01.frontend.dto.AlertThresholdDto;
 import com.hz01.frontend.views.MainLayout;
+import com.hz01.frontend.views.components.CustomNotification;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.formlayout.FormLayout;
 import com.vaadin.flow.component.html.H2;
-import com.vaadin.flow.component.notification.Notification;
-import com.vaadin.flow.component.notification.NotificationVariant;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
@@ -210,21 +209,11 @@ public class ThresholdView extends VerticalLayout implements LocaleChangeObserve
             }
             deviceThresholds.put(sensor, dto);
 
-            // Use simple Notification.show for proper auto-close behavior
-            Notification n = Notification.show(
-                getTranslation("threshold.save.success"),
-                3000,
-                Notification.Position.BOTTOM_START
-            );
-            n.addThemeVariants(NotificationVariant.LUMO_SUCCESS);
+            // Use custom notification for reliable display
+            CustomNotification.showSuccess(getTranslation("threshold.save.success"));
 
         } catch (Exception ex) {
-            Notification n = Notification.show(
-                getTranslation("common.error.api"),
-                3000,
-                Notification.Position.BOTTOM_START
-            );
-            n.addThemeVariants(NotificationVariant.LUMO_ERROR);
+            CustomNotification.showError(getTranslation("common.error.api"));
         }
     }
 
