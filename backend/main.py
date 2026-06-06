@@ -6,6 +6,8 @@ from app.database import create_tables
 from app.services.alert_service import seed_default_thresholds
 from app.database import SessionLocal
 from app.routers import devices, sensors, alerts, commands, simulate, websocket
+from app.services.device_monitor import device_monitor_loop
+import asyncio
 
 
 @asynccontextmanager
@@ -16,7 +18,18 @@ async def lifespan(app: FastAPI):
         seed_default_thresholds(db)
     finally:
         db.close()
+
+    # Start device heartbeat monitor in background
+    monitor_task = asyncio.create_task(device_monitor_loop())
+
     yield
+
+    # Cancel monitor on shutdown
+    monitor_task.cancel()
+    try:
+        await monitor_task
+    except asyncio.CancelledError:
+        pass
 
 
 app = FastAPI(
