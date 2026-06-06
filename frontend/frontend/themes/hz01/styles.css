@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700;800&family=Space+Mono:wght@400;700&display=swap');
 
 /* ── Keyframes ─────────────────────────────────────────── */
 @keyframes fadeIn   { from { opacity: 0; } to { opacity: 1; } }
@@ -12,256 +12,324 @@
     0%, 100% { transform: translateY(0); }
     50%       { transform: translateY(-6px); }
 }
+@keyframes scanline {
+    0%   { transform: translateY(-100%); }
+    100% { transform: translateY(100vh); }
+}
+@keyframes glitch {
+    0%, 100% { transform: translate(0); }
+    20% { transform: translate(-2px, 2px); }
+    40% { transform: translate(-2px, -2px); }
+    60% { transform: translate(2px, 2px); }
+    80% { transform: translate(2px, -2px); }
+}
+@keyframes hazardStripe {
+    0%   { background-position: 0 0; }
+    100% { background-position: 40px 0; }
+}
+@keyframes alertBlink {
+    0%, 49% { opacity: 1; }
+    50%, 100% { opacity: 0.3; }
+}
 
 /* ── Base tokens ────────────────────────────────────────── */
 html {
-    font-family: 'Inter', sans-serif;
+    font-family: 'JetBrains Mono', 'Courier New', monospace;
 
-    /* Type scale */
-    --lumo-font-size-xs:   0.82rem;
-    --lumo-font-size-s:    0.93rem;
-    --lumo-font-size-m:    1.05rem;
-    --lumo-font-size-l:    1.25rem;
-    --lumo-font-size-xl:   1.50rem;
-    --lumo-font-size-xxl:  1.85rem;
-    --lumo-font-size-xxxl: 2.40rem;
-    --lumo-size-m:   2.6rem;
-    --lumo-size-l:   3.1rem;
-    --lumo-size-xl:  3.9rem;
+    /* Type scale - brutalist, technical */
+    --lumo-font-size-xs:   0.75rem;
+    --lumo-font-size-s:    0.875rem;
+    --lumo-font-size-m:    1rem;
+    --lumo-font-size-l:    1.125rem;
+    --lumo-font-size-xl:   1.5rem;
+    --lumo-font-size-xxl:  2rem;
+    --lumo-font-size-xxxl: 2.5rem;
+    --lumo-size-m:   2.5rem;
+    --lumo-size-l:   3rem;
+    --lumo-size-xl:  3.5rem;
 
-    /* Dark palette */
-    --lumo-base-color:           #0f172a;
-    --lumo-body-text-color:      #e2e8f0;
-    --lumo-secondary-text-color: #94a3b8;
-    --lumo-tertiary-text-color:  #64748b;
-    --lumo-disabled-text-color:  #475569;
-    --lumo-contrast-5pct:        rgba(148,163,184,0.06);
-    --lumo-contrast-10pct:       rgba(148,163,184,0.10);
-    --lumo-contrast-20pct:       rgba(148,163,184,0.18);
-    --lumo-contrast-30pct:       rgba(148,163,184,0.28);
-    --lumo-contrast-40pct:       rgba(148,163,184,0.38);
-    --lumo-contrast-50pct:       rgba(148,163,184,0.50);
-    --lumo-contrast-60pct:       rgba(148,163,184,0.60);
-    --lumo-contrast-80pct:       rgba(148,163,184,0.80);
-    --lumo-contrast-90pct:       rgba(148,163,184,0.90);
+    /* Industrial dark palette - harsh blacks, amber, red */
+    --lumo-base-color:           #0a0a0a;
+    --lumo-body-text-color:      #f5f5f5;
+    --lumo-secondary-text-color: #a3a3a3;
+    --lumo-tertiary-text-color:  #737373;
+    --lumo-disabled-text-color:  #525252;
+    --lumo-contrast-5pct:        rgba(255,255,255,0.05);
+    --lumo-contrast-10pct:       rgba(255,255,255,0.10);
+    --lumo-contrast-20pct:       rgba(255,255,255,0.20);
+    --lumo-contrast-30pct:       rgba(255,255,255,0.30);
+    --lumo-contrast-40pct:       rgba(255,255,255,0.40);
+    --lumo-contrast-50pct:       rgba(255,255,255,0.50);
+    --lumo-contrast-60pct:       rgba(255,255,255,0.60);
+    --lumo-contrast-80pct:       rgba(255,255,255,0.80);
+    --lumo-contrast-90pct:       rgba(255,255,255,0.90);
 
-    /* Accent – blue-500 */
-    --lumo-primary-color:        #3b82f6;
-    --lumo-primary-color-50pct:  rgba(59,130,246,0.50);
-    --lumo-primary-color-10pct:  rgba(59,130,246,0.12);
-    --lumo-primary-text-color:   #60a5fa;
-    --lumo-primary-contrast-color: #ffffff;
+    /* Accent – industrial amber */
+    --lumo-primary-color:        #fbbf24;
+    --lumo-primary-color-50pct:  rgba(251,191,36,0.50);
+    --lumo-primary-color-10pct:  rgba(251,191,36,0.12);
+    --lumo-primary-text-color:   #fcd34d;
+    --lumo-primary-contrast-color: #000000;
 
-    /* Error / warning / success */
-    --lumo-error-color:          #f43f5e;
-    --lumo-error-color-50pct:    rgba(244,63,94,0.50);
-    --lumo-error-color-10pct:    rgba(244,63,94,0.12);
+    /* Error / warning / success - industrial safety colors */
+    --lumo-error-color:          #dc2626;
+    --lumo-error-color-50pct:    rgba(220,38,38,0.50);
+    --lumo-error-color-10pct:    rgba(220,38,38,0.12);
     --lumo-warning-color:        #f59e0b;
     --lumo-warning-color-10pct:  rgba(245,158,11,0.14);
-    --lumo-success-color:        #10b981;
-    --lumo-success-color-50pct:  rgba(16,185,129,0.50);
-    --lumo-success-color-10pct:  rgba(16,185,129,0.12);
+    --lumo-success-color:        #22c55e;
+    --lumo-success-color-50pct:  rgba(34,197,94,0.50);
+    --lumo-success-color-10pct:  rgba(34,197,94,0.12);
 
-    /* Borders */
-    --lumo-border-radius-s:  6px;
-    --lumo-border-radius-m:  10px;
-    --lumo-border-radius-l:  16px;
-    --lumo-space-m:          1.2rem;
+    /* Borders - sharp, no curves */
+    --lumo-border-radius-s:  2px;
+    --lumo-border-radius-m:  3px;
+    --lumo-border-radius-l:  4px;
+    --lumo-space-m:          1rem;
 
-    /* Shadows — deeper on dark */
-    --lumo-box-shadow-s:  0 2px 10px  rgba(0,0,0,0.40), 0 1px 3px rgba(0,0,0,0.25);
-    --lumo-box-shadow-m:  0 4px 20px  rgba(0,0,0,0.50), 0 2px 5px rgba(0,0,0,0.30);
-    --lumo-box-shadow-l:  0 8px 36px  rgba(0,0,0,0.55), 0 4px 10px rgba(0,0,0,0.35);
-    --lumo-box-shadow-xl: 0 16px 56px rgba(0,0,0,0.65), 0 6px 14px rgba(0,0,0,0.40);
+    /* Shadows — harsh, industrial */
+    --lumo-box-shadow-s:  0 2px 4px rgba(0,0,0,0.9);
+    --lumo-box-shadow-m:  0 4px 8px rgba(0,0,0,0.9);
+    --lumo-box-shadow-l:  0 8px 16px rgba(0,0,0,0.9);
+    --lumo-box-shadow-xl: 0 12px 24px rgba(0,0,0,0.9);
 }
 
 /* ── App-level background ───────────────────────────────── */
 vaadin-app-layout::part(content) {
-    background-color: #0f172a;
+    background-color: #0a0a0a;
     background-image:
-        radial-gradient(circle at 1px 1px, rgba(148,163,184,0.07) 1.5px, transparent 0);
-    background-size: 28px 28px;
+        linear-gradient(90deg, rgba(251,191,36,0.03) 1px, transparent 1px),
+        linear-gradient(0deg, rgba(251,191,36,0.03) 1px, transparent 1px);
+    background-size: 20px 20px;
     animation: fadeIn 0.5s ease-out;
+    position: relative;
+}
+
+/* Scanline effect overlay */
+vaadin-app-layout::part(content)::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 2px;
+    background: linear-gradient(90deg, transparent, #fbbf24, transparent);
+    animation: scanline 8s linear infinite;
+    pointer-events: none;
+    opacity: 0.3;
 }
 
 /* ── Sidebar ─────────────────────────────────────────────── */
 vaadin-app-layout::part(drawer) {
-    background: linear-gradient(170deg, #1e293b 0%, #0f172a 100%);
-    box-shadow: 4px 0 28px rgba(0,0,0,0.55);
-    border-right: 1px solid rgba(59,130,246,0.14);
-    min-width: 232px;
+    background: #000000;
+    box-shadow: 4px 0 0 0 #fbbf24, 8px 0 24px rgba(0,0,0,0.9);
+    border-right: 2px solid #fbbf24;
+    min-width: 240px;
 }
 
 vaadin-app-layout [slot="drawer"],
 vaadin-app-layout [slot="drawer"] * {
-    color: #e2e8f0;
+    color: #f5f5f5;
 }
 
 vaadin-side-nav {
-    --lumo-secondary-text-color: rgba(148,163,184,0.70);
-    --lumo-tertiary-text-color:  rgba(148,163,184,0.45);
-    --lumo-contrast-60pct:       rgba(148,163,184,0.60);
+    --lumo-secondary-text-color: rgba(163,163,163,0.80);
+    --lumo-tertiary-text-color:  rgba(115,115,115,0.60);
+    --lumo-contrast-60pct:       rgba(255,255,255,0.60);
 }
 
 vaadin-side-nav-item::part(item) {
-    color: rgba(226,232,240,0.78);
-    border-radius: 10px;
-    margin: 3px 8px;
+    color: rgba(245,245,245,0.85);
+    border-radius: 0;
+    margin: 2px 0;
     padding: 0 16px;
-    height: 2.7rem;
-    font-size: 0.97rem;
-    font-weight: 400;
-    transition: background 0.2s, color 0.2s, box-shadow 0.2s, border-color 0.2s;
-    border: 1px solid transparent;
+    height: 3rem;
+    font-size: 0.875rem;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    transition: all 0.15s;
+    border-left: 3px solid transparent;
+    border-right: 1px solid transparent;
+    background: transparent;
 }
 
 vaadin-side-nav-item:hover::part(item) {
-    background: rgba(59,130,246,0.12);
-    color: #93c5fd;
-    border-color: rgba(59,130,246,0.25);
-    box-shadow: 0 2px 12px rgba(59,130,246,0.18);
+    background: rgba(251,191,36,0.08);
+    color: #fcd34d;
+    border-left-color: #fbbf24;
+    border-right-color: rgba(251,191,36,0.2);
 }
 
 vaadin-side-nav-item[active]::part(item) {
-    background: linear-gradient(90deg, rgba(59,130,246,0.28) 0%, rgba(139,92,246,0.18) 100%);
-    color: #bfdbfe;
-    font-weight: 600;
-    border-color: rgba(99,153,247,0.40);
-    box-shadow: 0 2px 16px rgba(59,130,246,0.30), inset 4px 0 0 #60a5fa;
+    background:
+        repeating-linear-gradient(
+            45deg,
+            rgba(251,191,36,0.15),
+            rgba(251,191,36,0.15) 10px,
+            rgba(251,191,36,0.05) 10px,
+            rgba(251,191,36,0.05) 20px
+        );
+    color: #fbbf24;
+    font-weight: 700;
+    border-left: 4px solid #fbbf24;
+    border-right: 1px solid #fbbf24;
+    box-shadow: inset 0 0 20px rgba(251,191,36,0.1);
 }
 
 vaadin-side-nav-item::part(prefix),
 vaadin-side-nav-item::part(suffix) {
-    color: rgba(148,163,184,0.70);
+    color: rgba(163,163,163,0.70);
 }
 
 vaadin-side-nav-item[active]::part(prefix),
 vaadin-side-nav-item[active]::part(suffix) {
-    color: #60a5fa;
+    color: #fbbf24;
 }
 
 /* ── Navbar ──────────────────────────────────────────────── */
 vaadin-app-layout::part(navbar) {
-    background: #1e293b;
-    box-shadow: 0 2px 16px rgba(0,0,0,0.45), 0 1px 4px rgba(0,0,0,0.30);
-    border-bottom: 1px solid rgba(59,130,246,0.18);
-    min-height: 62px;
+    background: #000000;
+    box-shadow: 0 2px 0 0 #fbbf24, 0 4px 16px rgba(0,0,0,0.9);
+    border-bottom: 2px solid #fbbf24;
+    min-height: 64px;
 }
 
 /* ── Brand block ─────────────────────────────────────────── */
 .nav-brand {
     display: flex;
     flex-direction: column;
-    gap: 1px;
-    line-height: 1.2;
+    gap: 2px;
+    line-height: 1.1;
 }
 
 .brand-title-row {
     display: flex;
     align-items: center;
-    gap: 8px;
+    gap: 12px;
 }
 
 .brand-title {
-    font-size: 1.5rem;
-    font-weight: 900;
-    background: linear-gradient(90deg, #60a5fa 0%, #a78bfa 50%, #34d399 100%);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
-    letter-spacing: 0.06em;
+    font-family: 'Space Mono', monospace;
+    font-size: 1.75rem;
+    font-weight: 700;
+    color: #fbbf24;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
     animation: scaleIn 0.6s ease-out;
+    text-shadow: 0 0 10px rgba(251,191,36,0.5), 0 2px 4px rgba(0,0,0,0.8);
 }
 
 .brand-version {
     display: inline-block;
-    font-size: 0.60rem;
-    background: linear-gradient(90deg, #3b82f6 0%, #8b5cf6 100%);
-    color: white;
-    padding: 2px 9px;
-    border-radius: 20px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.625rem;
+    background: #dc2626;
+    color: #ffffff;
+    padding: 3px 8px;
+    border-radius: 0;
     font-weight: 700;
-    letter-spacing: 0.07em;
-    box-shadow: 0 2px 8px rgba(59,130,246,0.45);
+    letter-spacing: 0.1em;
+    box-shadow: 0 0 8px rgba(220,38,38,0.6);
     vertical-align: middle;
+    border: 1px solid #991b1b;
 }
 
 .brand-sub {
-    font-size: 0.68rem;
-    color: #64748b;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.625rem;
+    color: #a3a3a3;
     font-weight: 600;
-    letter-spacing: 0.12em;
+    letter-spacing: 0.15em;
     text-transform: uppercase;
 }
 
 /* ── Drawer header watermark ─────────────────────────────── */
 .drawer-watermark {
     display: block;
-    color: rgba(148,163,184,0.15);
-    font-size: 0.68rem;
-    font-weight: 800;
-    letter-spacing: 0.28em;
+    color: rgba(251,191,36,0.15);
+    font-family: 'Space Mono', monospace;
+    font-size: 0.75rem;
+    font-weight: 700;
+    letter-spacing: 0.3em;
     text-transform: uppercase;
-    padding: 0.7rem 1.25rem 0.3rem;
+    padding: 1rem 1.25rem 0.5rem;
 }
 
 /* ── Grid ────────────────────────────────────────────────── */
 vaadin-grid {
-    border-radius: 14px;
-    box-shadow: 0 4px 28px rgba(0,0,0,0.50), 0 1px 6px rgba(0,0,0,0.35);
-    background: #1e293b;
+    border-radius: 0;
+    box-shadow: 0 0 0 2px #fbbf24, 0 4px 24px rgba(0,0,0,0.9);
+    background: #0a0a0a;
     overflow: hidden;
-    border: 1px solid rgba(59,130,246,0.14);
+    border: none;
     animation: slideUp 0.5s ease-out;
-    --lumo-base-color: #1e293b;
-    --lumo-tint-5pct:  rgba(148,163,184,0.05);
-    --lumo-tint-10pct: rgba(148,163,184,0.08);
+    --lumo-base-color: #0a0a0a;
+    --lumo-tint-5pct:  rgba(255,255,255,0.05);
+    --lumo-tint-10pct: rgba(255,255,255,0.08);
 }
 
 /* ── Buttons ─────────────────────────────────────────────── */
 vaadin-button::part(button) {
-    background: linear-gradient(135deg, #3b82f6 0%, #6366f1 100%);
-    color: #ffffff;
-    border: none;
-    border-radius: 8px;
-    box-shadow: 0 2px 10px rgba(59,130,246,0.35), 0 1px 3px rgba(0,0,0,0.20);
-    transition: box-shadow 0.18s, transform 0.12s;
-    font-weight: 600;
+    background: #fbbf24;
+    color: #000000;
+    border: 2px solid #fbbf24;
+    border-radius: 0;
+    box-shadow: 4px 4px 0 0 rgba(0,0,0,0.3);
+    transition: all 0.1s;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
 }
 
 vaadin-button:hover::part(button) {
-    box-shadow: 0 5px 18px rgba(59,130,246,0.50), 0 2px 5px rgba(0,0,0,0.25);
-    transform: translateY(-2px);
+    background: #fcd34d;
+    box-shadow: 6px 6px 0 0 rgba(0,0,0,0.4);
+    transform: translate(-2px, -2px);
 }
 
 vaadin-button:active::part(button) {
-    box-shadow: 0 1px 4px rgba(0,0,0,0.20);
-    transform: translateY(0);
+    box-shadow: 2px 2px 0 0 rgba(0,0,0,0.3);
+    transform: translate(2px, 2px);
 }
 
 vaadin-button[theme~="tertiary"]::part(button),
 vaadin-button[theme~="tertiary-inline"]::part(button) {
     background: transparent;
-    border: 1px solid rgba(59,130,246,0.35);
-    color: #60a5fa;
+    border: 2px solid #fbbf24;
+    color: #fbbf24;
     box-shadow: none;
 }
 
 vaadin-button[theme~="tertiary"]:hover::part(button) {
-    background: rgba(59,130,246,0.12);
-    border-color: rgba(59,130,246,0.55);
-    box-shadow: 0 3px 12px rgba(59,130,246,0.22);
-    transform: translateY(-1px);
+    background: rgba(251,191,36,0.15);
+    border-color: #fcd34d;
+    box-shadow: 0 0 12px rgba(251,191,36,0.4);
+    transform: none;
 }
 
 vaadin-button[theme~="error"]::part(button) {
-    background: linear-gradient(135deg, #f43f5e 0%, #e11d48 100%);
-    box-shadow: 0 2px 10px rgba(244,63,94,0.40);
+    background: #dc2626;
+    border-color: #dc2626;
+    color: #ffffff;
+    box-shadow: 4px 4px 0 0 rgba(0,0,0,0.4);
+}
+
+vaadin-button[theme~="error"]:hover::part(button) {
+    background: #ef4444;
+    box-shadow: 6px 6px 0 0 rgba(0,0,0,0.5);
 }
 
 vaadin-button[theme~="success"]::part(button) {
-    background: linear-gradient(135deg, #10b981 0%, #059669 100%);
-    box-shadow: 0 2px 10px rgba(16,185,129,0.40);
+    background: #22c55e;
+    border-color: #22c55e;
+    color: #000000;
+    box-shadow: 4px 4px 0 0 rgba(0,0,0,0.4);
+}
+
+vaadin-button[theme~="success"]:hover::part(button) {
+    background: #4ade80;
+    box-shadow: 6px 6px 0 0 rgba(0,0,0,0.5);
 }
 
 /* ── Form fields ─────────────────────────────────────────── */
@@ -270,12 +338,12 @@ vaadin-number-field::part(input-field),
 vaadin-integer-field::part(input-field),
 vaadin-select::part(input-field),
 vaadin-combo-box::part(input-field) {
-    background: #0f172a;
-    border: 1px solid rgba(59,130,246,0.22);
-    border-radius: 8px;
-    box-shadow: 0 1px 5px rgba(0,0,0,0.30);
-    color: #e2e8f0;
-    transition: border-color 0.18s, box-shadow 0.18s;
+    background: #000000;
+    border: 2px solid #525252;
+    border-radius: 0;
+    box-shadow: inset 2px 2px 4px rgba(0,0,0,0.5);
+    color: #f5f5f5;
+    transition: border-color 0.15s, box-shadow 0.15s;
 }
 
 vaadin-text-field[focused]::part(input-field),
@@ -283,8 +351,8 @@ vaadin-number-field[focused]::part(input-field),
 vaadin-integer-field[focused]::part(input-field),
 vaadin-select[focused]::part(input-field),
 vaadin-combo-box[focused]::part(input-field) {
-    border-color: rgba(59,130,246,0.65);
-    box-shadow: 0 0 0 3px rgba(59,130,246,0.20), 0 1px 5px rgba(0,0,0,0.30);
+    border-color: #fbbf24;
+    box-shadow: 0 0 0 3px rgba(251,191,36,0.25), inset 2px 2px 4px rgba(0,0,0,0.5);
 }
 
 vaadin-text-field::part(label),
@@ -292,89 +360,115 @@ vaadin-number-field::part(label),
 vaadin-integer-field::part(label),
 vaadin-select::part(label),
 vaadin-combo-box::part(label) {
-    color: #94a3b8;
-    font-size: 0.82rem;
-    font-weight: 600;
-    letter-spacing: 0.04em;
+    color: #a3a3a3;
+    font-size: 0.75rem;
+    font-weight: 700;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
 }
 
 /* ── Radio buttons ───────────────────────────────────────── */
 vaadin-radio-button::part(radio) {
-    border-color: rgba(59,130,246,0.45);
-    background: #0f172a;
+    border-color: #fbbf24;
+    background: #000000;
+    border-width: 2px;
 }
 
 vaadin-radio-button[checked]::part(radio) {
-    border-color: #3b82f6;
-    background: #3b82f6;
+    border-color: #fbbf24;
+    background: #fbbf24;
 }
 
 /* ── Tabs ────────────────────────────────────────────────── */
 vaadin-tabs {
-    border-bottom: 1px solid rgba(59,130,246,0.18);
+    border-bottom: 2px solid #525252;
     background: transparent;
 }
 
 vaadin-tab {
-    color: #64748b;
-    font-weight: 500;
-    transition: color 0.18s;
+    color: #737373;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    transition: color 0.15s;
 }
 
 vaadin-tab:hover {
-    color: #94a3b8;
+    color: #a3a3a3;
 }
 
 vaadin-tab[selected] {
-    color: #60a5fa;
-    font-weight: 600;
+    color: #fbbf24;
+    font-weight: 700;
 }
 
 vaadin-tabs::part(tabs-container)::after {
-    background: linear-gradient(90deg, #3b82f6, #8b5cf6);
+    background: #fbbf24;
+    height: 3px;
 }
 
 /* ── TabSheet ────────────────────────────────────────────── */
 vaadin-tab-sheet::part(content) {
-    background: #1e293b;
-    border-radius: 0 0 12px 12px;
-    border: 1px solid rgba(59,130,246,0.12);
+    background: #0a0a0a;
+    border-radius: 0;
+    border: 2px solid #525252;
     border-top: none;
-    padding: 1.2rem;
+    padding: 1.5rem;
 }
 
-/* ── Notifications - PROPER FIX for Vaadin's container layout ───────────────────────────────────────── */
+/* ── Notifications - Industrial alert style ───────────────────────────────────────── */
 
 /* The notification container takes full width by default - we need to make it auto-fit */
 vaadin-notification-container {
     pointer-events: none !important;
 }
 
-/* Notification cards inside container should be inline-flex to size to content */
+/* Notification cards - brutalist industrial style */
 vaadin-notification-card {
     display: inline-flex !important;
     pointer-events: auto !important;
-    box-shadow: 0 10px 40px rgba(0,0,0,0.60), 0 2px 8px rgba(0,0,0,0.35) !important;
-    border-radius: 12px !important;
-    background: #1e293b !important;
-    border: 1px solid rgba(59,130,246,0.22) !important;
-    animation: slideUp 0.3s ease-out !important;
-    /* No outer padding/margin */
+    box-shadow: 0 0 0 3px #fbbf24, 0 8px 32px rgba(0,0,0,0.9) !important;
+    border-radius: 0 !important;
+    background: #000000 !important;
+    border: 3px solid #fbbf24 !important;
+    animation: slideUp 0.2s ease-out !important;
     padding: 0 !important;
     margin: 0 !important;
     width: auto !important;
     min-width: 0 !important;
     max-width: none !important;
+    position: relative !important;
+}
+
+/* Hazard stripe pattern for critical alerts */
+vaadin-notification-card::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    width: 8px;
+    background: repeating-linear-gradient(
+        45deg,
+        #fbbf24,
+        #fbbf24 10px,
+        #000000 10px,
+        #000000 20px
+    );
 }
 
 /* Inner span gets the padding */
 vaadin-notification-card span {
-    margin: 0 !important;
-    padding: 12px 20px !important;
+    margin: 0 0 0 8px !important;
+    padding: 14px 24px !important;
     display: inline-block !important;
     white-space: nowrap !important;
-    font-size: 0.95rem !important;
+    font-size: 0.875rem !important;
+    font-weight: 700 !important;
+    text-transform: uppercase !important;
+    letter-spacing: 0.05em !important;
     line-height: 1.4 !important;
+    color: #fbbf24 !important;
 }
 
 /* Override Vaadin's overlay part */
@@ -386,23 +480,64 @@ vaadin-notification-card::part(overlay) {
 
 /* Theme variants */
 vaadin-notification-card[theme~="success"] {
-    border-color: rgba(16,185,129,0.4) !important;
-    background: #10b981 !important;
+    border-color: #22c55e !important;
+    background: #000000 !important;
+    box-shadow: 0 0 0 3px #22c55e, 0 8px 32px rgba(34,197,94,0.4) !important;
+}
+
+vaadin-notification-card[theme~="success"]::before {
+    background: repeating-linear-gradient(
+        45deg,
+        #22c55e,
+        #22c55e 10px,
+        #000000 10px,
+        #000000 20px
+    );
 }
 
 vaadin-notification-card[theme~="success"] span {
-    color: white !important;
-    font-weight: 600 !important;
+    color: #22c55e !important;
 }
 
 vaadin-notification-card[theme~="error"] {
-    border-color: rgba(244,63,94,0.4) !important;
-    background: #f43f5e !important;
+    border-color: #dc2626 !important;
+    background: #000000 !important;
+    box-shadow: 0 0 0 3px #dc2626, 0 8px 32px rgba(220,38,38,0.6) !important;
+    animation: slideUp 0.2s ease-out, alertBlink 0.6s ease-in-out 3 !important;
+}
+
+vaadin-notification-card[theme~="error"]::before {
+    background: repeating-linear-gradient(
+        45deg,
+        #dc2626,
+        #dc2626 10px,
+        #000000 10px,
+        #000000 20px
+    );
 }
 
 vaadin-notification-card[theme~="error"] span {
-    color: white !important;
-    font-weight: 600 !important;
+    color: #dc2626 !important;
+}
+
+vaadin-notification-card[theme~="warning"] {
+    border-color: #f59e0b !important;
+    background: #000000 !important;
+    box-shadow: 0 0 0 3px #f59e0b, 0 8px 32px rgba(245,158,11,0.5) !important;
+}
+
+vaadin-notification-card[theme~="warning"]::before {
+    background: repeating-linear-gradient(
+        45deg,
+        #f59e0b,
+        #f59e0b 10px,
+        #000000 10px,
+        #000000 20px
+    );
+}
+
+vaadin-notification-card[theme~="warning"] span {
+    color: #f59e0b !important;
 }
 
 /* ── Number / Integer field step buttons ─────────────────── */
@@ -410,46 +545,50 @@ vaadin-integer-field::part(decrease-button),
 vaadin-integer-field::part(increase-button),
 vaadin-number-field::part(decrease-button),
 vaadin-number-field::part(increase-button) {
-    color: #60a5fa;
+    color: #fbbf24;
 }
 
 /* ── Select dropdown ─────────────────────────────────────── */
 vaadin-select-overlay,
 vaadin-combo-box-overlay {
-    background: #1e293b;
-    border: 1px solid rgba(59,130,246,0.22);
-    border-radius: 10px;
-    box-shadow: 0 8px 32px rgba(0,0,0,0.55);
+    background: #000000;
+    border: 2px solid #fbbf24;
+    border-radius: 0;
+    box-shadow: 0 0 0 2px #fbbf24, 0 8px 24px rgba(0,0,0,0.9);
 }
 
 vaadin-select-item:hover,
 vaadin-combo-box-item:hover {
-    background: rgba(59,130,246,0.14);
+    background: rgba(251,191,36,0.15);
 }
 
 vaadin-select-item[selected],
 vaadin-combo-box-item[selected] {
-    background: rgba(59,130,246,0.22);
-    color: #60a5fa;
-    font-weight: 600;
+    background: rgba(251,191,36,0.25);
+    color: #fbbf24;
+    font-weight: 700;
 }
 
 /* ── H2 page titles ──────────────────────────────────────── */
 h2 {
-    background: linear-gradient(90deg, #60a5fa 0%, #a78bfa 100%);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
-    font-weight: 800;
-    letter-spacing: 0.02em;
+    font-family: 'Space Mono', monospace;
+    color: #fbbf24;
+    font-weight: 700;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
     animation: slideUp 0.45s ease-out;
+    text-shadow: 0 0 10px rgba(251,191,36,0.5);
+    position: relative;
+    display: inline-block;
+    padding-bottom: 0.5rem;
+    border-bottom: 3px solid #fbbf24;
 }
 
 h4 {
-    color: #94a3b8;
-    font-size: 0.85rem;
+    color: #a3a3a3;
+    font-size: 0.75rem;
     font-weight: 700;
-    letter-spacing: 0.08em;
+    letter-spacing: 0.1em;
     text-transform: uppercase;
     margin-top: 0.5rem;
 }
@@ -457,155 +596,229 @@ h4 {
 /* ── Status badges ───────────────────────────────────────── */
 .badge-normal {
     display: inline-block;
-    background: rgba(16,185,129,0.18);
-    color: #34d399;
-    padding: 4px 14px;
-    border-radius: 999px;
+    background: #000000;
+    color: #22c55e;
+    padding: 4px 12px;
+    border-radius: 0;
     font-weight: 700;
-    font-size: 0.80em;
-    letter-spacing: 0.05em;
-    border: 1px solid rgba(52,211,153,0.35);
-    box-shadow: 0 0 8px rgba(52,211,153,0.20);
+    font-size: 0.75em;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    border: 2px solid #22c55e;
+    box-shadow: 0 0 8px rgba(34,197,94,0.4);
 }
 
 .badge-warning {
     display: inline-block;
-    background: rgba(245,158,11,0.18);
-    color: #fbbf24;
-    padding: 4px 14px;
-    border-radius: 999px;
+    background: #000000;
+    color: #f59e0b;
+    padding: 4px 12px;
+    border-radius: 0;
     font-weight: 700;
-    font-size: 0.80em;
-    letter-spacing: 0.05em;
-    border: 1px solid rgba(251,191,36,0.35);
-    box-shadow: 0 0 8px rgba(251,191,36,0.20);
+    font-size: 0.75em;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    border: 2px solid #f59e0b;
+    box-shadow: 0 0 8px rgba(245,158,11,0.5);
+    position: relative;
+}
+
+.badge-warning::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    width: 4px;
+    background: repeating-linear-gradient(
+        45deg,
+        #f59e0b,
+        #f59e0b 4px,
+        #000000 4px,
+        #000000 8px
+    );
 }
 
 .badge-critical {
     display: inline-block;
-    background: rgba(244,63,94,0.18);
-    color: #fb7185;
-    padding: 4px 14px;
-    border-radius: 999px;
+    background: #000000;
+    color: #dc2626;
+    padding: 4px 12px 4px 16px;
+    border-radius: 0;
     font-weight: 700;
-    font-size: 0.80em;
-    letter-spacing: 0.05em;
-    border: 1px solid rgba(251,113,133,0.40);
-    box-shadow: 0 0 10px rgba(244,63,94,0.28);
-    animation: pulseRing 1.8s ease-out infinite;
+    font-size: 0.75em;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    border: 2px solid #dc2626;
+    box-shadow: 0 0 12px rgba(220,38,38,0.6);
+    animation: alertBlink 1s ease-in-out infinite;
+    position: relative;
+}
+
+.badge-critical::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    width: 6px;
+    background: repeating-linear-gradient(
+        45deg,
+        #dc2626,
+        #dc2626 4px,
+        #fbbf24 4px,
+        #fbbf24 8px
+    );
+    animation: hazardStripe 1s linear infinite;
 }
 
 .badge-offline {
     display: inline-block;
-    background: rgba(71,85,105,0.30);
-    color: #94a3b8;
-    padding: 4px 14px;
-    border-radius: 999px;
+    background: #000000;
+    color: #737373;
+    padding: 4px 12px;
+    border-radius: 0;
     font-weight: 700;
-    font-size: 0.80em;
-    letter-spacing: 0.05em;
-    border: 1px solid rgba(100,116,139,0.30);
+    font-size: 0.75em;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    border: 2px solid #525252;
 }
 
 /* ── Sensor card ─────────────────────────────────────────── */
 .sensor-card {
-    background: linear-gradient(135deg, #1e293b 0%, #162032 100%);
-    border-radius: 16px;
-    padding: 1.2rem 1.4rem;
-    border: 1px solid rgba(59,130,246,0.15);
-    box-shadow: 0 4px 20px rgba(0,0,0,0.45);
-    transition: transform 0.25s ease, box-shadow 0.25s ease, border-color 0.25s;
+    background: #000000;
+    border-radius: 0;
+    padding: 1.5rem;
+    border: 2px solid #525252;
+    box-shadow: 4px 4px 0 0 rgba(251,191,36,0.3);
+    transition: transform 0.15s ease, box-shadow 0.15s ease, border-color 0.15s;
     animation: scaleIn 0.5s ease-out;
+    position: relative;
+}
+
+.sensor-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    right: 0;
+    width: 0;
+    height: 0;
+    border-style: solid;
+    border-width: 0 20px 20px 0;
+    border-color: transparent #525252 transparent transparent;
 }
 
 .sensor-card:hover {
-    transform: translateY(-6px);
-    box-shadow: 0 10px 32px rgba(59,130,246,0.22), 0 4px 10px rgba(0,0,0,0.40);
-    border-color: rgba(59,130,246,0.35);
+    transform: translate(-2px, -2px);
+    box-shadow: 6px 6px 0 0 rgba(251,191,36,0.5);
+    border-color: #fbbf24;
 }
 
 .sensor-card-title {
-    font-size: 0.80rem;
+    font-size: 0.75rem;
     font-weight: 700;
-    letter-spacing: 0.10em;
+    letter-spacing: 0.12em;
     text-transform: uppercase;
-    color: #64748b;
+    color: #a3a3a3;
 }
 
 .sensor-card-value {
-    font-size: 2.2rem;
-    font-weight: 800;
-    color: #e2e8f0;
+    font-family: 'Space Mono', monospace;
+    font-size: 2.5rem;
+    font-weight: 700;
+    color: #f5f5f5;
     line-height: 1;
+    text-shadow: 0 2px 4px rgba(0,0,0,0.5);
 }
 
 .sensor-card-unit {
-    font-size: 0.85rem;
-    color: #64748b;
-    font-weight: 500;
-    margin-left: 4px;
+    font-size: 0.875rem;
+    color: #737373;
+    font-weight: 700;
+    margin-left: 6px;
     align-self: flex-end;
 }
 
 .sensor-card-value-row {
     display: flex;
     align-items: baseline;
-    gap: 4px;
-    margin: 0.4rem 0;
+    gap: 6px;
+    margin: 0.5rem 0;
 }
 
 .sensor-card-dot {
-    width: 8px;
-    height: 8px;
-    border-radius: 50%;
-    background: #64748b;
+    width: 10px;
+    height: 10px;
+    border-radius: 0;
+    background: #525252;
     margin-left: auto;
     align-self: center;
+    border: 2px solid #525252;
 }
 
-.sensor-normal  { border-left: 3px solid #10b981; }
-.sensor-warning { border-left: 3px solid #f59e0b; }
+.sensor-normal  {
+    border-left: 4px solid #22c55e;
+    border-top: 2px solid #22c55e;
+}
+.sensor-warning {
+    border-left: 4px solid #f59e0b;
+    border-top: 2px solid #f59e0b;
+}
 .sensor-critical {
-    border-left: 3px solid #f43f5e;
-    box-shadow: 0 4px 20px rgba(244,63,94,0.22), 0 4px 10px rgba(0,0,0,0.40);
+    border-left: 4px solid #dc2626;
+    border-top: 2px solid #dc2626;
+    box-shadow: 6px 6px 0 0 rgba(220,38,38,0.4);
+    animation: alertBlink 1.5s ease-in-out infinite;
 }
 
-.sensor-normal  .sensor-card-dot { background: #10b981; box-shadow: 0 0 6px rgba(16,185,129,0.60); }
-.sensor-warning .sensor-card-dot { background: #f59e0b; box-shadow: 0 0 6px rgba(245,158,11,0.60); }
+.sensor-normal  .sensor-card-dot {
+    background: #22c55e;
+    border-color: #22c55e;
+    box-shadow: 0 0 8px rgba(34,197,94,0.8);
+}
+.sensor-warning .sensor-card-dot {
+    background: #f59e0b;
+    border-color: #f59e0b;
+    box-shadow: 0 0 8px rgba(245,158,11,0.8);
+}
 .sensor-critical .sensor-card-dot {
-    background: #f43f5e;
-    box-shadow: 0 0 8px rgba(244,63,94,0.80);
-    animation: pulseRing 1.4s ease-out infinite;
+    background: #dc2626;
+    border-color: #dc2626;
+    box-shadow: 0 0 10px rgba(220,38,38,1);
+    animation: alertBlink 1s ease-in-out infinite;
 }
 
-.sensor-normal  .sensor-card-value { color: #34d399; }
-.sensor-warning .sensor-card-value { color: #fbbf24; }
-.sensor-critical .sensor-card-value { color: #fb7185; }
+.sensor-normal  .sensor-card-value { color: #22c55e; }
+.sensor-warning .sensor-card-value { color: #f59e0b; }
+.sensor-critical .sensor-card-value { color: #dc2626; }
 
 .sensor-card-bar {
-    --lumo-primary-color: #3b82f6;
-    height: 4px;
-    border-radius: 2px;
-    margin-top: 0.4rem;
+    --lumo-primary-color: #fbbf24;
+    height: 6px;
+    border-radius: 0;
+    margin-top: 0.5rem;
+    border: 1px solid #525252;
 }
 
 /* ── Progress bar ────────────────────────────────────────── */
 vaadin-progress-bar {
-    --lumo-primary-color: #3b82f6;
-    height: 4px;
-    border-radius: 4px;
-    background: rgba(59,130,246,0.14);
+    --lumo-primary-color: #fbbf24;
+    height: 6px;
+    border-radius: 0;
+    background: #000000;
+    border: 1px solid #525252;
 }
 
 /* ── Hr divider ──────────────────────────────────────────── */
 hr {
     border: none;
-    border-top: 1px solid rgba(59,130,246,0.14);
-    margin: 0.5rem 0;
+    border-top: 2px solid #525252;
+    margin: 1rem 0;
 }
 
 /* ── VerticalLayout / HorizontalLayout within content ────── */
 vaadin-vertical-layout,
 vaadin-horizontal-layout {
-    color: #e2e8f0;
+    color: #f5f5f5;
 }

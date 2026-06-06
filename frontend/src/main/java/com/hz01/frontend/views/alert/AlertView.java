@@ -92,7 +92,6 @@ public class AlertView extends VerticalLayout implements LocaleChangeObserver {
 
                 loadData();
             });
-            });
             return btn;
         }).setHeader(getTranslation("alert.action")).setAutoWidth(true);
 

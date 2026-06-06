@@ -50,16 +50,16 @@ public class MainLayout extends AppLayout implements RouterLayout, LocaleChangeO
     private void buildDrawer() {
         Div accentBar = new Div();
         accentBar.getStyle()
-                .set("height", "4px")
+                .set("height", "6px")
                 .set("width", "100%")
-                .set("background", "linear-gradient(90deg, #60a5fa 0%, #818cf8 40%, #34d399 100%)");
+                .set("background", "repeating-linear-gradient(90deg, #fbbf24 0px, #fbbf24 20px, #000000 20px, #000000 40px)");
 
         Span watermark = new Span("HZ-01");
         watermark.addClassName("drawer-watermark");
 
         SideNav nav = new SideNav();
         nav.addItem(navDashboard, navAlerts, navThresholds, navControl);
-        nav.getStyle().set("padding", "0.25rem 0.25rem");
+        nav.getStyle().set("padding", "0.5rem 0.5rem");
         nav.setWidthFull();
 
         addToDrawer(accentBar, watermark, nav);
@@ -67,7 +67,7 @@ public class MainLayout extends AppLayout implements RouterLayout, LocaleChangeO
 
     private void buildNavbar() {
         DrawerToggle toggle = new DrawerToggle();
-        toggle.getStyle().set("color", "#94a3b8");
+        toggle.getStyle().set("color", "#fbbf24");
 
         // Brand — absolutely centered in the navbar
         Div brand = new Div();
@@ -88,7 +88,7 @@ public class MainLayout extends AppLayout implements RouterLayout, LocaleChangeO
         Div titleRow = new Div(brandTitle, versionBadge);
         titleRow.addClassName("brand-title-row");
 
-        Span brandSub = new Span("Administrator Page");
+        Span brandSub = new Span("HAZARD MONITORING SYSTEM");
         brandSub.addClassName("brand-sub");
 
         brand.add(titleRow, brandSub);
@@ -110,8 +110,8 @@ public class MainLayout extends AppLayout implements RouterLayout, LocaleChangeO
         langSelect.setItems(LOCALES.keySet().stream().toList());
         langSelect.setValue(currentLang);
         langSelect.getStyle()
-                .set("--lumo-base-color", "#1e293b")
-                .set("--lumo-body-text-color", "#94a3b8");
+                .set("--lumo-base-color", "#000000")
+                .set("--lumo-body-text-color", "#fbbf24");
         langSelect.addValueChangeListener(e -> {
             if (e.isFromClient()) {
                 Locale locale = LOCALES.getOrDefault(e.getValue(), HZ01I18nProvider.LOCALE_EN);
