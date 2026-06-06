@@ -11,6 +11,7 @@ DEFAULT_THRESHOLDS = {
     "humidity":    {"warning_min": 20,  "warning_max": 80, "critical_min": 10,  "critical_max": 95, "unit": "%"},
     "oxygen":      {"warning_min": 19.5,"warning_max": 23, "critical_min": 18,  "critical_max": 25, "unit": "%"},
     "co_level":    {"warning_min": None,"warning_max": 25, "critical_min": None,"critical_max": 50, "unit": "ppm"},
+    "methane_level":{"warning_min": None,"warning_max": 2000,"critical_min": None,"critical_max": 3000,"unit": "ppm"},
     "battery_level":{"warning_min": 20, "warning_max": None,"critical_min": 10, "critical_max": None,"unit": "%"},
 }
 
@@ -50,6 +51,7 @@ async def evaluate_reading(db: Session, reading: SensorReading):
         "humidity": reading.humidity,
         "oxygen": reading.oxygen,
         "co_level": reading.co_level,
+        "methane_level": reading.methane_level,
         "battery_level": reading.battery_level,
     }
     events = []

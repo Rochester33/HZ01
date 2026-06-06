@@ -171,14 +171,19 @@ public class ThresholdView extends VerticalLayout implements LocaleChangeObserve
     }
 
     /**
-     * Validates all fields: each must be empty (keep current) or a non-negative integer.
-     * Disables the save button if any field contains an invalid value.
+     * Validates all fields: each must be empty (keep current) or a non-negative
+     * integer. Gas sensors (co_level, methane_level) read raw ADC counts in the
+     * thousands, so only temperature/humidity are capped at 100.
      */
     private void validateFields() {
+        String sensor = sensorSelect.getValue();
+        boolean percentSensor = "temperature".equals(sensor) || "humidity".equals(sensor);
+        double max = percentSensor ? 100 : 65535;
+
         boolean valid = true;
         for (NumberField f : new NumberField[]{warnMin, warnMax, critMin, critMax}) {
             Double val = f.getValue();
-            if (val != null && (val < 0 || val > 100 || val != Math.floor(val))) {
+            if (val != null && (val < 0 || val > max || val != Math.floor(val))) {
                 valid = false;
                 break;
             }

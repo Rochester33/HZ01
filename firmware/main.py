@@ -58,6 +58,12 @@ thresholds = {
 buzzer_manual_on = None   # None = auto mode; True = forced ON; False = forced OFF
 led_manual_on    = None
 
+# Ids of commands already executed, so re-delivered commands (the server now
+# retries un-acknowledged commands) don't fire an action a second time.
+# Bounded so it can't grow without limit on a long-running device.
+_seen_cmd_ids      = []
+_seen_cmd_max      = 64
+
 
 # ── Sensor helpers ────────────────────────────────────────────────────────────
 def read_dht():
@@ -113,9 +119,34 @@ def play_sos():
 
 
 # ── Command execution (shared by both Wi-Fi and Serial modes) ─────────────────
+def _already_executed(cmd_id):
+    """Return True if this command id was already run (re-delivery)."""
+    if cmd_id is None:
+        return False        # no id (e.g. local/test command) — always run
+    return cmd_id in _seen_cmd_ids
+
+
+def _mark_executed(cmd_id):
+    if cmd_id is None:
+        return
+    _seen_cmd_ids.append(cmd_id)
+    if len(_seen_cmd_ids) > _seen_cmd_max:
+        # Drop the oldest half; old ids won't be re-polled once acknowledged.
+        del _seen_cmd_ids[:_seen_cmd_max // 2]
+
+
 def execute_command(cmd):
-    """Execute a single command dict {command_type, action, id?, thresholds?}."""
+    """Execute a single command dict {command_type, action, id?, thresholds?}.
+
+    Idempotent: the server retries un-acknowledged commands, so an action that
+    was already run for a given id is skipped (config pushes are safe to re-run,
+    but one-shot actions like sos/blink must not double-fire).
+    """
     global buzzer_manual_on, led_manual_on, thresholds
+
+    cmd_id   = cmd.get("id")
+    if _already_executed(cmd_id):
+        return
 
     cmd_type = cmd.get("command_type")
     action   = cmd.get("action")
@@ -176,6 +207,10 @@ def execute_command(cmd):
                     print("Thresholds updated:", thresholds)
             except Exception as e:
                 print("Failed to parse thresholds:", e)
+
+    # Record the id last, so a command that raised mid-execution isn't marked
+    # done and can be retried by the server.
+    _mark_executed(cmd_id)
 
 
 # ── Serial-mode: read inbound commands from stdin (REPL port) ────────────────
@@ -259,15 +294,17 @@ def upload_reading(temp, humidity, mq4_value, mq7_value):
             resp.close()
             return ok
         except OSError as e:
+            # Retry once on a transient network/timeout error, then give up.
             if attempt == 0:
                 print("Upload timeout, retrying...")
                 time.sleep(1)
-            else:
-                print("Upload network error:", e)
+                continue
+            print("Upload network error:", e)
             return False
         except Exception as e:
             print("Upload failed:", e)
             return False
+    return False
 
 def acknowledge_command(cmd_id):
     try:
