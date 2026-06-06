@@ -118,7 +118,7 @@ public class DeviceDetailView extends VerticalLayout
             }
 
             String message = ok ? getTranslation("control.send.success") : getTranslation("control.send.fail");
-            Notification n = Notification.show(message, 2000, Notification.Position.BOTTOM_END);
+            Notification n = Notification.show(message, 3000, Notification.Position.BOTTOM_START);
             n.addThemeVariants(ok ? NotificationVariant.LUMO_SUCCESS : NotificationVariant.LUMO_ERROR);
 
             if (!ok) sosToggle.setValue(!active); // revert on failure
@@ -157,7 +157,7 @@ public class DeviceDetailView extends VerticalLayout
                 : commandService.sendLed(deviceId, action, 5);
 
         String message = ok ? getTranslation("control.send.success") : getTranslation("control.send.fail");
-        Notification n = Notification.show(message, 2000, Notification.Position.BOTTOM_END);
+        Notification n = Notification.show(message, 3000, Notification.Position.BOTTOM_START);
         n.addThemeVariants(ok ? NotificationVariant.LUMO_SUCCESS : NotificationVariant.LUMO_ERROR);
     }
 

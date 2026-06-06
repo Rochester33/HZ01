@@ -85,8 +85,8 @@ public class AlertView extends VerticalLayout implements LocaleChangeObserver {
 
                 Notification n = Notification.show(
                     getTranslation("alert.acknowledge.success"),
-                    2000,
-                    Notification.Position.BOTTOM_END
+                    3000,
+                    Notification.Position.BOTTOM_START
                 );
                 n.addThemeVariants(NotificationVariant.LUMO_SUCCESS);
 

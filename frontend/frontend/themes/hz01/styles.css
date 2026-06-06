@@ -421,6 +421,7 @@ vaadin-tab-sheet::part(content) {
 /* The notification container takes full width by default - we need to make it auto-fit */
 vaadin-notification-container {
     pointer-events: none !important;
+    z-index: 9999 !important;
 }
 
 /* Notification cards - brutalist industrial style */
@@ -433,14 +434,14 @@ vaadin-notification-card {
     border: 3px solid #fbbf24 !important;
     animation: slideUp 0.2s ease-out !important;
     padding: 0 !important;
-    margin: 0 !important;
+    margin: 8px !important;
     width: auto !important;
     min-width: 0 !important;
-    max-width: none !important;
+    max-width: 500px !important;
     position: relative !important;
 }
 
-/* Hazard stripe pattern for critical alerts */
+/* Hazard stripe pattern for all alerts */
 vaadin-notification-card::before {
     content: '';
     position: absolute;
@@ -457,12 +458,26 @@ vaadin-notification-card::before {
     );
 }
 
-/* Inner span gets the padding */
-vaadin-notification-card span {
+/* Inner content gets the padding */
+vaadin-notification-card > div {
     margin: 0 0 0 8px !important;
     padding: 14px 24px !important;
     display: inline-block !important;
-    white-space: nowrap !important;
+    font-size: 0.875rem !important;
+    font-weight: 700 !important;
+    text-transform: uppercase !important;
+    letter-spacing: 0.05em !important;
+    line-height: 1.4 !important;
+    color: #fbbf24 !important;
+    width: 100%;
+    box-sizing: border-box;
+}
+
+/* Inner span gets the styling */
+vaadin-notification-card span {
+    margin: 0 !important;
+    padding: 0 !important;
+    display: inline-block !important;
     font-size: 0.875rem !important;
     font-weight: 700 !important;
     text-transform: uppercase !important;
@@ -495,6 +510,7 @@ vaadin-notification-card[theme~="success"]::before {
     );
 }
 
+vaadin-notification-card[theme~="success"] > div,
 vaadin-notification-card[theme~="success"] span {
     color: #22c55e !important;
 }
@@ -503,7 +519,6 @@ vaadin-notification-card[theme~="error"] {
     border-color: #dc2626 !important;
     background: #000000 !important;
     box-shadow: 0 0 0 3px #dc2626, 0 8px 32px rgba(220,38,38,0.6) !important;
-    animation: slideUp 0.2s ease-out, alertBlink 0.6s ease-in-out 3 !important;
 }
 
 vaadin-notification-card[theme~="error"]::before {
@@ -516,6 +531,7 @@ vaadin-notification-card[theme~="error"]::before {
     );
 }
 
+vaadin-notification-card[theme~="error"] > div,
 vaadin-notification-card[theme~="error"] span {
     color: #dc2626 !important;
 }
@@ -536,6 +552,7 @@ vaadin-notification-card[theme~="warning"]::before {
     );
 }
 
+vaadin-notification-card[theme~="warning"] > div,
 vaadin-notification-card[theme~="warning"] span {
     color: #f59e0b !important;
 }

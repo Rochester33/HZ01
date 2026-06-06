@@ -213,16 +213,16 @@ public class ThresholdView extends VerticalLayout implements LocaleChangeObserve
             // Use simple Notification.show for proper auto-close behavior
             Notification n = Notification.show(
                 getTranslation("threshold.save.success"),
-                2000,
-                Notification.Position.BOTTOM_END
+                3000,
+                Notification.Position.BOTTOM_START
             );
             n.addThemeVariants(NotificationVariant.LUMO_SUCCESS);
 
         } catch (Exception ex) {
             Notification n = Notification.show(
                 getTranslation("common.error.api"),
-                2000,
-                Notification.Position.BOTTOM_END
+                3000,
+                Notification.Position.BOTTOM_START
             );
             n.addThemeVariants(NotificationVariant.LUMO_ERROR);
         }
