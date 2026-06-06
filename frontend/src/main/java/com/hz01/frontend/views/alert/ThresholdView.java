@@ -218,7 +218,15 @@ public class ThresholdView extends VerticalLayout implements LocaleChangeObserve
             CustomNotification.showSuccess(getTranslation("threshold.save.success"));
 
         } catch (Exception ex) {
-            CustomNotification.showError(getTranslation("common.error.api"));
+            // Parse error message from backend
+            String errorMsg = ex.getMessage();
+            if (errorMsg != null && errorMsg.contains("Device is offline")) {
+                CustomNotification.showError(getTranslation("threshold.save.device_offline"));
+            } else if (errorMsg != null && errorMsg.contains("Device not found")) {
+                CustomNotification.showError(getTranslation("threshold.save.device_not_found"));
+            } else {
+                CustomNotification.showError(getTranslation("common.error.api"));
+            }
         }
     }
 

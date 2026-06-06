@@ -48,6 +48,14 @@ def get_device_thresholds(device_id: str, db: Session = Depends(get_db)):
 def upsert_threshold(payload: ThresholdUpdate, db: Session = Depends(get_db)):
     from datetime import datetime
 
+    # If updating a specific device's threshold, check if it's online
+    if payload.device_id:
+        target_device = db.query(Device).filter(Device.device_id == payload.device_id).first()
+        if not target_device:
+            raise HTTPException(status_code=404, detail="Device not found")
+        if target_device.status != "online":
+            raise HTTPException(status_code=400, detail="Device is offline, cannot update threshold")
+
     row = (
         db.query(AlertThreshold)
         .filter(AlertThreshold.sensor_type == payload.sensor_type)
@@ -67,8 +75,14 @@ def upsert_threshold(payload: ThresholdUpdate, db: Session = Depends(get_db)):
     db.commit()
     db.refresh(row)
 
-    # Push threshold updates to all online devices
-    online_devices = db.query(Device).filter(Device.status == "online").all()
+    # Push threshold updates to affected online devices
+    # For device-specific updates: only that device
+    # For global updates: all online devices
+    if payload.device_id:
+        online_devices = [target_device]  # Already verified online above
+    else:
+        online_devices = db.query(Device).filter(Device.status == "online").all()
+
     for device in online_devices:
         # Fetch all thresholds for this device
         sensor_types = ["temperature", "humidity", "oxygen", "co_level", "methane_level", "battery_level"]
