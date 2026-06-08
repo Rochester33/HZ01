@@ -44,15 +44,13 @@ public class AlertApiClient {
         }
     }
 
-    public void upsertThreshold(AlertThresholdDto dto) {
-        try {
-            webClient.put()
-                    .uri("/api/v1/alerts/thresholds")
-                    .bodyValue(dto)
-                    .retrieve()
-                    .toBodilessEntity()
-                    .block();
-        } catch (Exception ignored) {}
+    public void upsertThreshold(AlertThresholdDto dto) throws Exception {
+        webClient.put()
+                .uri("/api/v1/alerts/thresholds")
+                .bodyValue(dto)
+                .retrieve()
+                .toBodilessEntity()
+                .block();
     }
 
     public List<AlertEventDto> getEvents(Boolean acknowledged) {

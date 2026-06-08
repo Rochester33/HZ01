@@ -59,7 +59,7 @@ public class ControlView extends VerticalLayout implements LocaleChangeObserver 
 
         TabSheet tabs = new TabSheet();
         tabs.add(new Tab(getTranslation("control.buzzer")), buildTogglePanel("buzzer"));
-        tabs.add(new Tab(getTranslation("control.led")), buildLedPanel());
+        tabs.add(new Tab(getTranslation("control.led")), buildTogglePanel("led"));
         tabs.add(new Tab(getTranslation("control.emergency")), buildEmergencyPanel());
         tabs.setWidthFull();
 
@@ -67,9 +67,16 @@ public class ControlView extends VerticalLayout implements LocaleChangeObserver 
     }
 
     /**
-     * Build a simple ON/OFF/AUTO toggle panel for a given device type (buzzer or led).
+     * Build a simple ON/OFF/(AUTO|BLINK) toggle panel for a given device type.
+     * The buzzer has no blink mode (it would just be noise), so its third button
+     * is AUTO, which hands control back to the threshold-based alerting. The LED
+     * keeps a BLINK button.
      */
     private VerticalLayout buildTogglePanel(String type) {
+        boolean isBuzzer = "buzzer".equals(type);
+        String thirdAction = isBuzzer ? "auto" : "blink";
+        String thirdLabel = isBuzzer ? "control.action.auto" : "control.action.blink";
+
         Button onBtn = new Button(getTranslation("control.action.on"));
         onBtn.addThemeVariants(ButtonVariant.LUMO_SUCCESS, ButtonVariant.LUMO_PRIMARY);
         onBtn.addClickListener(e -> sendCommand(type, "on", 0));
@@ -78,11 +85,11 @@ public class ControlView extends VerticalLayout implements LocaleChangeObserver 
         offBtn.addThemeVariants(ButtonVariant.LUMO_ERROR);
         offBtn.addClickListener(e -> sendCommand(type, "off", 0));
 
-        Button autoBtn = new Button(getTranslation("control.action.blink"));
-        autoBtn.addThemeVariants(ButtonVariant.LUMO_TERTIARY);
-        autoBtn.addClickListener(e -> sendCommand(type, "blink", 0));
+        Button thirdBtn = new Button(getTranslation(thirdLabel));
+        thirdBtn.addThemeVariants(ButtonVariant.LUMO_TERTIARY);
+        thirdBtn.addClickListener(e -> sendCommand(type, thirdAction, 0));
 
-        HorizontalLayout btnRow = new HorizontalLayout(onBtn, offBtn, autoBtn);
+        HorizontalLayout btnRow = new HorizontalLayout(onBtn, offBtn, thirdBtn);
         btnRow.setSpacing(true);
         btnRow.setPadding(false);
         btnRow.setAlignItems(FlexComponent.Alignment.CENTER);
@@ -92,10 +99,6 @@ public class ControlView extends VerticalLayout implements LocaleChangeObserver 
                 btnRow);
         panel.setPadding(true);
         return panel;
-    }
-
-    private VerticalLayout buildLedPanel() {
-        return buildTogglePanel("led");
     }
 
     /**

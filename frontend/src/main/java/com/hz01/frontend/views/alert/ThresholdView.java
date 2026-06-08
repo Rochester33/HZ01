@@ -60,8 +60,9 @@ public class ThresholdView extends VerticalLayout implements LocaleChangeObserve
 
         add(new H2(getTranslation("nav.thresholds")));
 
-        // Device selector
+        // Device selector - only show online devices
         List<String> deviceIds = deviceApiClient.getAllDevices().stream()
+                .filter(d -> "online".equals(d.status()))
                 .map(d -> d.deviceId())
                 .toList();
 
@@ -219,13 +220,23 @@ public class ThresholdView extends VerticalLayout implements LocaleChangeObserve
 
         } catch (Exception ex) {
             // Parse error message from backend
-            String errorMsg = ex.getMessage();
-            if (errorMsg != null && errorMsg.contains("Device is offline")) {
+            String errorMsg = ex.getMessage() != null ? ex.getMessage() : "";
+
+            // Check for offline device error
+            if (errorMsg.contains("Device is offline") || errorMsg.contains("offline")) {
                 CustomNotification.showError(getTranslation("threshold.save.device_offline"));
-            } else if (errorMsg != null && errorMsg.contains("Device not found")) {
+            }
+            // Check for device not found error
+            else if (errorMsg.contains("Device not found") || errorMsg.contains("not found")) {
                 CustomNotification.showError(getTranslation("threshold.save.device_not_found"));
-            } else {
-                CustomNotification.showError(getTranslation("common.error.api"));
+            }
+            // Check for 400 Bad Request
+            else if (errorMsg.contains("400") || errorMsg.contains("Bad Request")) {
+                CustomNotification.showError(getTranslation("threshold.save.device_offline"));
+            }
+            // Generic error
+            else {
+                CustomNotification.showError(getTranslation("common.error.api") + ": " + errorMsg);
             }
         }
     }

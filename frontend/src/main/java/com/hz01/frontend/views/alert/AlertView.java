@@ -14,9 +14,6 @@ import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.grid.GridVariant;
 import com.vaadin.flow.component.html.H2;
-import com.vaadin.flow.component.html.Span;
-import com.vaadin.flow.component.notification.Notification;
-import com.vaadin.flow.component.notification.NotificationVariant;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.i18n.LocaleChangeEvent;
@@ -103,30 +100,11 @@ public class AlertView extends VerticalLayout implements LocaleChangeObserver {
     @Override
     protected void onAttach(AttachEvent event) {
         UI ui = event.getUI();
-        subscription = eventBus.subscribeAlerts().subscribe(msg -> {
-            ui.access(() -> {
-                String message = msg.deviceId() + " — " + msg.sensorType() + ": " + msg.value();
-                Span text = new Span(message);
-                text.getStyle()
-                    .set("display", "inline-block")
-                    .set("padding", "var(--lumo-space-m)")
-                    .set("max-width", "400px")
-                    .set("word-wrap", "break-word")
-                    .set("white-space", "normal");
-
-                Notification n = new Notification(text);
-                if ("critical".equals(msg.level())) {
-                    n.addThemeVariants(NotificationVariant.LUMO_ERROR);
-                } else {
-                    n.addThemeVariants(NotificationVariant.LUMO_WARNING);
-                }
-                n.setPosition(Notification.Position.TOP_END);
-                n.setDuration(5000);
-                n.open();
-
-                loadData();
-            });
-        });
+        // Real-time alerts are shown directly in the grid below rather than as a
+        // pop-up: every incoming alert just reloads the table so the newest event
+        // appears at the top.
+        subscription = eventBus.subscribeAlerts().subscribe(msg ->
+                ui.access(this::loadData));
     }
 
     @Override

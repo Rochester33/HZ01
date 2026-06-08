@@ -164,13 +164,8 @@ def execute_command(cmd):
         elif action == "auto":
             buzzer_manual_on = None
             # Let the main loop handle it based on thresholds
-        elif action == "blink":
-            buzzer_manual_on = None  # Return to auto after blink
-            for _ in range(5):
-                buzzer.value(1)
-                time.sleep_ms(500)
-                buzzer.value(0)
-                time.sleep_ms(500)
+        # Note: the buzzer intentionally has no "blink" mode — a blinking buzzer
+        # is just intermittent noise. Any stray "blink" command is ignored.
 
     elif cmd_type == "led":
         if action == "on":
@@ -283,7 +278,7 @@ def upload_reading(temp, humidity, mq4_value, mq7_value):
                 url,
                 json=payload,
                 headers={"Content-Type": "application/json"},
-                timeout=15,  # Increased from 5s to 15s
+                timeout=5,  # Keep short: a slow upload would delay the next command poll
             )
             # Accept both 200 and 201 as success
             ok = resp.status_code in (200, 201)
@@ -473,9 +468,10 @@ while True:
 
     # Upload and poll commands
     if not SERIAL_MODE:
-        upload_ok = upload_reading(temp, humidity, mq4_value, mq7_value)
-        # Poll commands EVERY cycle for immediate response
+        # Poll commands FIRST so command latency never waits behind a slow
+        # sensor upload (which can block for the full upload timeout).
         recv_ok = poll_commands()
+        upload_ok = upload_reading(temp, humidity, mq4_value, mq7_value)
     else:
         print(json.dumps({
             "device_id":   DEVICE_ID,

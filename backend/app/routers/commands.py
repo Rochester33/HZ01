@@ -17,6 +17,15 @@ REDELIVER_AFTER = timedelta(seconds=5)
 
 @router.post("/", response_model=CommandResponse, status_code=201)
 def send_command(payload: CommandCreate, db: Session = Depends(get_db)):
+    from app.models.device import Device
+
+    # Check if device exists and is online
+    device = db.query(Device).filter(Device.device_id == payload.device_id).first()
+    if not device:
+        raise HTTPException(status_code=404, detail="Device not found")
+    if device.status != "online":
+        raise HTTPException(status_code=400, detail="Device is offline, cannot send command")
+
     cmd = DeviceCommand(**payload.model_dump())
     db.add(cmd)
     db.commit()

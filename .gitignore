@@ -64,3 +64,6 @@ dist/
 
 # Compiled docs
 *.pdf
+
+# Runtime process id files
+.pids/
