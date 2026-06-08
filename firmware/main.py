@@ -305,10 +305,12 @@ def acknowledge_command(cmd_id):
     try:
         resp = urequests.patch(
             "{}/api/v1/commands/{}/acknowledge".format(BACKEND_URL, cmd_id),
-            timeout=5,
+            timeout=2,
         )
         resp.close()
     except Exception:
+        # A missed ACK is harmless: the server re-delivers and the device
+        # dedupes by id, so we never block the loop waiting on the ACK.
         pass
 
 
@@ -316,7 +318,7 @@ def poll_commands():
     """Fetch pending commands from server and execute each one. Returns True if any received."""
     try:
         url  = "{}/api/v1/commands/pending/{}".format(BACKEND_URL, DEVICE_ID)
-        resp = urequests.get(url, timeout=5)
+        resp = urequests.get(url, timeout=3)
         cmds = resp.json()
         resp.close()
     except Exception:
@@ -369,10 +371,22 @@ oled(wifi_connected, False, False, False)
 # Allow DHT11 to stabilise after power-on before the first read
 time.sleep(2)
 
+# Command polling runs EVERY loop for low, stable command latency; the much
+# heavier sensor read + upload only runs every Nth loop so a slow upload can
+# never sit in front of the next command poll. With a ~0.5s loop this uploads
+# roughly every 1.5s — far inside the 5-minute offline window, so the device
+# stays reliably "online" and the Control buttons keep working.
+UPLOAD_INTERVAL_CYCLES = 3
+
 poll_tick   = 0
 upload_ok   = False
 recv_ok     = False
 reconnect_delay = 0  # Delay counter for WiFi reconnection
+
+# Last good sensor values + status, kept across the cycles that skip the read.
+temp = humidity = None
+mq4_value = mq7_value = "Not Detected"
+status = "Online"
 
 # ── Main loop ─────────────────────────────────────────────────────────────────
 while True:
@@ -389,90 +403,106 @@ while True:
                     reconnect_delay = 10  # Wait 10 seconds before next retry
             else:
                 reconnect_delay -= 1
-
-    temp, humidity = read_dht()
-    mq4_value      = read_mq4()
-    mq7_value      = read_mq7()
-
-    # Debug output
-    print("Temp: {}, Humidity: {}, MQ4: {}, MQ7: {}".format(temp, humidity, mq4_value, mq7_value))
-
-    # Check thresholds using dynamic values (None if not set)
-    temp_warn_min = thresholds.get("temperature", {}).get("warning_min")
-    temp_warn_max = thresholds.get("temperature", {}).get("warning_max")
-    temp_crit_min = thresholds.get("temperature", {}).get("critical_min")
-    temp_crit_max = thresholds.get("temperature", {}).get("critical_max")
-
-    humid_warn_min = thresholds.get("humidity", {}).get("warning_min")
-    humid_warn_max = thresholds.get("humidity", {}).get("warning_max")
-    humid_crit_min = thresholds.get("humidity", {}).get("critical_min")
-    humid_crit_max = thresholds.get("humidity", {}).get("critical_max")
-
-    co_warn = thresholds.get("co_level", {}).get("warning_max", 2000)
-    methane_warn = thresholds.get("methane_level", {}).get("warning_max", 2000)
-
-    gas_alert = (
-        (isinstance(mq4_value, int) and mq4_value >= methane_warn) or
-        (isinstance(mq7_value, int) and mq7_value >= co_warn)
-    )
-
-    if temp is not None and humidity is not None:
-        # Manual control has highest priority
-        if buzzer_manual_on is True:
-            buzzer.value(1)
-        elif buzzer_manual_on is False:
-            buzzer.value(0)
         else:
-            # Auto mode: check thresholds (only if they exist)
-            temp_alert = False
-            if temp_warn_min is not None and temp <= temp_warn_min:
-                temp_alert = True
-            if temp_warn_max is not None and temp >= temp_warn_max:
-                temp_alert = True
+            # Poll commands FIRST, every cycle — this is the latency-critical
+            # path the Control page buttons depend on.
+            recv_ok = poll_commands()
 
-            humid_alert = False
-            if humid_warn_min is not None and humidity <= humid_warn_min:
-                humid_alert = True
-            if humid_warn_max is not None and humidity >= humid_warn_max:
-                humid_alert = True
+    # Hold manual buzzer/LED state on every cycle so an ON/OFF command takes
+    # effect immediately and keeps holding even on cycles that skip the sensor
+    # read. Manual control always wins over auto.
+    if buzzer_manual_on is True:
+        buzzer.value(1)
+    elif buzzer_manual_on is False:
+        buzzer.value(0)
+    if led_manual_on is True:
+        led.value(1)
+    elif led_manual_on is False:
+        led.value(0)
 
-            auto_on = temp_alert or humid_alert or gas_alert
+    # Heavy work — sensor read, threshold evaluation and the network upload —
+    # only runs every UPLOAD_INTERVAL_CYCLES so it never delays the per-cycle
+    # command poll above. Auto-mode threshold reaction still happens here at a
+    # ~1.5s cadence, which is plenty fast for environmental alerts.
+    do_upload = (not SERIAL_MODE) and (poll_tick % UPLOAD_INTERVAL_CYCLES == 0)
 
-            print("Auto buzzer: temp={} (alert={}), humidity={} (alert={}), gas_alert={}".format(
-                temp, temp_alert, humidity, humid_alert, gas_alert))
-            buzzer.value(1 if auto_on else 0)
+    if SERIAL_MODE or do_upload:
+        temp, humidity = read_dht()
+        mq4_value      = read_mq4()
+        mq7_value      = read_mq7()
 
-        # Critical status check (only if thresholds exist)
-        temp_critical = False
-        if temp_crit_min is not None and temp <= temp_crit_min:
-            temp_critical = True
-        if temp_crit_max is not None and temp >= temp_crit_max:
-            temp_critical = True
+        # Debug output
+        print("Temp: {}, Humidity: {}, MQ4: {}, MQ7: {}".format(temp, humidity, mq4_value, mq7_value))
 
-        humid_critical = False
-        if humid_crit_min is not None and humidity <= humid_crit_min:
-            humid_critical = True
-        if humid_crit_max is not None and humidity >= humid_crit_max:
-            humid_critical = True
+        # Check thresholds using dynamic values (None if not set)
+        temp_warn_min = thresholds.get("temperature", {}).get("warning_min")
+        temp_warn_max = thresholds.get("temperature", {}).get("warning_max")
+        temp_crit_min = thresholds.get("temperature", {}).get("critical_min")
+        temp_crit_max = thresholds.get("temperature", {}).get("critical_max")
 
-        if temp_critical or humid_critical or gas_alert:
-            status = "Warning"
+        humid_warn_min = thresholds.get("humidity", {}).get("warning_min")
+        humid_warn_max = thresholds.get("humidity", {}).get("warning_max")
+        humid_crit_min = thresholds.get("humidity", {}).get("critical_min")
+        humid_crit_max = thresholds.get("humidity", {}).get("critical_max")
+
+        co_warn = thresholds.get("co_level", {}).get("warning_max", 2000)
+        methane_warn = thresholds.get("methane_level", {}).get("warning_max", 2000)
+
+        gas_alert = (
+            (isinstance(mq4_value, int) and mq4_value >= methane_warn) or
+            (isinstance(mq7_value, int) and mq7_value >= co_warn)
+        )
+
+        if temp is not None and humidity is not None:
+            # Manual buzzer state is already held at the top of the loop; here we
+            # only drive the buzzer when in auto mode (buzzer_manual_on is None).
+            if buzzer_manual_on is None:
+                temp_alert = False
+                if temp_warn_min is not None and temp <= temp_warn_min:
+                    temp_alert = True
+                if temp_warn_max is not None and temp >= temp_warn_max:
+                    temp_alert = True
+
+                humid_alert = False
+                if humid_warn_min is not None and humidity <= humid_warn_min:
+                    humid_alert = True
+                if humid_warn_max is not None and humidity >= humid_warn_max:
+                    humid_alert = True
+
+                auto_on = temp_alert or humid_alert or gas_alert
+
+                print("Auto buzzer: temp={} (alert={}), humidity={} (alert={}), gas_alert={}".format(
+                    temp, temp_alert, humidity, humid_alert, gas_alert))
+                buzzer.value(1 if auto_on else 0)
+
+            # Critical status check (only if thresholds exist)
+            temp_critical = False
+            if temp_crit_min is not None and temp <= temp_crit_min:
+                temp_critical = True
+            if temp_crit_max is not None and temp >= temp_crit_max:
+                temp_critical = True
+
+            humid_critical = False
+            if humid_crit_min is not None and humidity <= humid_crit_min:
+                humid_critical = True
+            if humid_crit_max is not None and humidity >= humid_crit_max:
+                humid_critical = True
+
+            if temp_critical or humid_critical or gas_alert:
+                status = "Warning"
+            else:
+                status = "Online"
         else:
+            # Sensor read failed: only release the buzzer if we're in auto mode.
+            print("Sensor read failed")
+            if buzzer_manual_on is None:
+                buzzer.value(0)
             status = "Online"
-    else:
-        # If sensor reading failed, only turn off buzzer in auto mode
-        print("Sensor read failed")
-        if buzzer_manual_on is None:
-            buzzer.value(0)
-        status = "Online"
 
-    # Upload and poll commands
-    if not SERIAL_MODE:
-        # Poll commands FIRST so command latency never waits behind a slow
-        # sensor upload (which can block for the full upload timeout).
-        recv_ok = poll_commands()
+    # Upload (only on upload cycles). Command polling already ran above.
+    if do_upload:
         upload_ok = upload_reading(temp, humidity, mq4_value, mq7_value)
-    else:
+    elif SERIAL_MODE:
         print(json.dumps({
             "device_id":   DEVICE_ID,
             "temperature": temp,
@@ -483,5 +513,8 @@ while True:
         }))
 
     oled(wifi_connected, False, upload_ok, recv_ok)
+
+    poll_tick += 1
+    time.sleep(0.5)  # Short loop keeps command latency low and stable
 
     time.sleep(0.5)  # Reduced from 1s to 0.5s for faster response
